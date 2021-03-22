@@ -2,11 +2,13 @@
 ####################################################################################################################
 # Filter variants - Medium.
 # Author: Haiying Kong
-# Last Modified: 4 March 2021
+# Last Modified: 22 March 2021
 ####################################################################################################################
 ####################################################################################################################
 options(stringsAsFactors=FALSE)
 rm(list=ls())
+
+library(xlsx)
 
 # Get argument values from command line.
 args = commandArgs(trailingOnly=TRUE)
@@ -136,6 +138,8 @@ if (length(idx.var) > 0)  {
 ####################################################################################################################
 # Save the list of variants after filtering.
 write.table(var, paste0(res.dir, '/Filtered/', filter.style, '/', sam, '.maf'), row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
+write.xlsx(var, paste0(res.dir, '/Filtered/', filter.style, '/', sam, '.xlsx'), sheetName=paste0('Filtered_', filter.style),
+           row.names=FALSE, col.names=TRUE, append=FALSE)
 
 ####################################################################################################################
 ####################################################################################################################

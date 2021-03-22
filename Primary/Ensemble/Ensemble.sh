@@ -1,7 +1,7 @@
 ####################################################################################################################
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants.
-# Author: Haiying Kong
+# Author: Haiying Kong and Balthasar Schlotmann
 # Last Modified: 16 March 2021
 ####################################################################################################################
 ####################################################################################################################
@@ -12,20 +12,17 @@ source /home/projects/cu_10184/projects/PTH/Software/envsetup
 ####################################################################################################################
 ####################################################################################################################
 # Get batch name and number of thread from argument passing.
-while getopts ":d:b:p:t:c:h:" opt
+while getopts ":d:b:p:t:" opt
 do
   case $opt in
     d) dir_name="$OPTARG";;
     b) batch="$OPTARG";;
     p) panel="$OPTARG";;
     t) n_thread="$OPTARG";;
-    c) classify_tool="$OPTARG";;
-    h) thresh_n_human_read="$OPTARG";;
-    \?) echo "Invalid option -$OPTARG" >&5;;
+    \?) echo "Invalid option -$OPTARG" >&3;;
   esac
 done
 n_thread=${n_thread#0}
-thresh_n_human_read=${thresh_n_human_read#0}
 
 ####################################################################################################################
 ####################################################################################################################
@@ -75,16 +72,18 @@ fi
 
 if [ -z "${n_thread}" ]
 then
+  echo "By default, each job will use 8 cores."
   n_thread=8
-fi
+fi 
 
 ####################################################################################################################
 ####################################################################################################################
 # Define directory for the batch.
-fq_dir=/home/projects/cu_10184/projects/${dir_name}/PanelSeqData/${batch}/fastq/${classify_tool}
+fq_dir=/home/projects/cu_10184/projects/${dir_name}/PanelSeqData/${batch}/fastq
 batch_dir=/home/projects/cu_10184/projects/${dir_name}/BatchWork/${batch}
 
 # Create a new directory for the batch.
+rm -rf ${batch_dir}
 mkdir -p ${batch_dir}
 
 # Change to working directory.
@@ -96,15 +95,13 @@ cd ${temp_dir}
 ####################################################################################################################
 # Define directories to save log files and error files.
 # log directory:
-mkdir -p ${batch_dir}/log
+mkdir ${batch_dir}/log
 log_dir=${batch_dir}/log/Ensemble
-rm -rf ${log_dir}
 mkdir ${log_dir}
 
 # error directory:
-mkdir -p ${batch_dir}/error
+mkdir ${batch_dir}/error
 error_dir=${batch_dir}/error/Ensemble
-rm -rf ${error_dir}
 mkdir ${error_dir}
 
 ####################################################################################################################
@@ -112,7 +109,6 @@ mkdir ${error_dir}
 # Define directories to save intermediate results.
 ####################################################################################################################
 Lock_dir=${batch_dir}/Lock
-rm -rf ${Lock_dir}
 mkdir ${Lock_dir}
 
 ####################################################################################################################
@@ -167,7 +163,6 @@ Lock_SoftClipping_dir=${Lock_ITD_dir}/SoftClipping
 # Define directories to save final results.
 ####################################################################################################################
 Result_dir=${batch_dir}/Result
-rm -rf ${Result_dir}
 mkdir ${Result_dir}
 
 ####################################################################################################################
@@ -203,24 +198,15 @@ cd ${temp_dir}
 ####################################################################################################################
 # Get sample names.
 samples=($(echo ${fq_files[@]%_R*.fq.gz} | tr ' ' '\n' | sort -u | tr '\n' ' '))
-# samples=$(awk -F"\t" -v var=${pct_thresh} 'NR>1 && $8>var' /home/projects/cu_10184/projects/PTH/PanelSeqData/PDX_001/meta/Summary_ReadCounts.txt | cut -d$'\t' -f 1)
 
 ####################################################################################################################
 # Run pipeline on all samples in this batch.
 ####################################################################################################################
 for sample in ${samples[@]}
 do
-  # Check if the sample has sufficient reads from human genome.
-  read_count_file=/home/projects/cu_10184/projects/${dir_name}/PDXseqData/${batch}/${classify_tool}/ReadCount/${sample}.txt
-  n_human_read=$(awk -F"\t" 'NR>1 {print $2}' ${read_count_file})
-  if [ ${n_human_read} -lt ${thresh_n_human_read} ]
-    then
-      echo "$batch $sample: Too few reads from human genome."
-    else
-      qsub -o ${log_dir}/${sample}.log -e ${error_dir}/${sample}.error -N ${batch}_${sample}_Ensemble \
-        -v n_thread=${n_thread},target_chr=${target_chr},target_nochr=${target_nochr},target_nopad=${target_nopad},batch=${batch},sample=${sample},fq_dir=${fq_dir},BAM_dir=${BAM_dir},BAM_lock_dir=${BAM_lock_dir},Lock_SNV_InDel_dir=${Lock_SNV_InDel_dir},Lock_VarDict_dir=${Lock_VarDict_dir},Lock_SNVer_dir=${Lock_SNVer_dir},Lock_LoFreq_dir=${Lock_LoFreq_dir},Result_SNV_InDel_dir=${Result_SNV_InDel_dir},Lock_CNACS_dir=${Lock_CNACS_dir},Lock_DOC_dir=${Lock_DOC_dir},Lock_SoftClipping_dir=${Lock_SoftClipping_dir},temp_dir=${temp_dir} \
-        /home/projects/cu_10184/projects/PTH/Code/PDX/Ensemble/Ensemble_job.sh
-  fi
+  qsub -o ${log_dir}/${sample}.log -e ${error_dir}/${sample}.error -N ${batch}_${sample}_Ensemble \
+    -v n_thread=${n_thread},target_chr=${target_chr},target_nochr=${target_nochr},target_nopad=${target_nopad},batch=${batch},sample=${sample},fq_dir=${fq_dir},BAM_dir=${BAM_dir},BAM_lock_dir=${BAM_lock_dir},Lock_SNV_InDel_dir=${Lock_SNV_InDel_dir},Lock_VarDict_dir=${Lock_VarDict_dir},Lock_SNVer_dir=${Lock_SNVer_dir},Lock_LoFreq_dir=${Lock_LoFreq_dir},Result_SNV_InDel_dir=${Result_SNV_InDel_dir},Lock_CNACS_dir=${Lock_CNACS_dir},Lock_DOC_dir=${Lock_DOC_dir},Lock_SoftClipping_dir=${Lock_SoftClipping_dir},temp_dir=${temp_dir} \
+    /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble_job.sh
 done
 
 ####################################################################################################################

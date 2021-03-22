@@ -1,0 +1,58 @@
+
+R version 4.0.3 (2020-10-10) -- "Bunny-Wunnies Freak Out"
+Copyright (C) 2020 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ####################################################################################################################
+> ####################################################################################################################
+> # Copy fastq files for primary samples from cu_10145 to cu_10184.
+> # Author: Haiying Kong
+> # Last Modified: 12 March 2021
+> ####################################################################################################################
+> ####################################################################################################################
+> setwd('/home/projects/cu_10184/projects/PTH')
+> options(stringsAsFactors=FALSE)
+> rm(list=ls())
+> 
+> library(stringr)
+> 
+> ####################################################################################################################
+> # Set values.
+> batch.nums = str_pad(1:11, 3, pad='0')
+> from.dir = '/home/projects/cu_10145/people/haikon/Project/PTH/PanelSeqData'
+> to.dir = '/home/projects/cu_10184/projects/PTH/PanelSeqData'
+> 
+> ####################################################################################################################
+> ####################################################################################################################
+> # Copy sequence files for Batch001-011.
+> for (batch.num in batch.nums)   {
++ 
++   from.batch = paste0(from.dir, '/Batch', batch.num)
++   to.batch = paste0(to.dir, '/Primary_', batch.num)
++ 
++   if (dir.exists(to.batch))  unlink(to.batch, recursive=TRUE)
++ 
++   system(paste0('rsync -r --times --copy-links ', from.batch, '/ ', to.batch))
++ 
++   }
+> 
+> ####################################################################################################################
+> ####################################################################################################################
+> 
+> proc.time()
+    user   system  elapsed 
+1207.267  979.099 6307.834 
