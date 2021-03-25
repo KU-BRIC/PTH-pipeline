@@ -21,7 +21,7 @@ hg="/home/projects/cu_10184/people/haikon/Reference/GATK/hg38_MaskedU2AF1L5/Homo
 Funcotator_DB="/home/projects/cu_10184/people/haikon/Reference/Funcotator/funcotator_dataSources.v1.7.20200521s"
 
 # Software tools:
-picard="java -jar /home/projects/cu_10145/people/haikon/Software/picard.jar"
+picard="java -jar /home/projects/cu_10184/people/haikon/Software/picard.jar"
 
 ####################################################################################################################
 ####################################################################################################################
@@ -206,13 +206,13 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter
 ####################################################################################################################
 conda activate CNACS
 
-export JAVAPATH=/home/projects/cu_10145/people/haikon/Software/anaconda3/bin/
-export PICARD_PATH=/home/projects/cu_10145/people/haikon/Software/picard.jar
-export SAMTOOLS_PATH=/home/projects/cu_10145/people/haikon/Software/samtools-1.11/bin
+export JAVAPATH=/home/projects/cu_10184/people/haikon/Software/anaconda3/bin
+export PICARD_PATH=/home/projects/cu_10184/people/haikon/Software/picard.jar
+export SAMTOOLS_PATH=/home/projects/cu_10184/people/haikon/Software/samtools-1.12/bin
 export PERL_PATH=/usr/bin/perl
-export BEDTOOLS_PATH=/home/projects/cu_10145/people/haikon/Software/anaconda3/bin/
-export R_PATH=/home/projects/cu_10145/people/haikon/Software/R-4.0.3/bin/R
-export R_LIBS_PATH=/home/projects/cu_10145/people/haikon/Software/R-4.0.3/library
+export BEDTOOLS_PATH=/home/projects/cu_10184/people/haikon/Software/anaconda3/bin
+export R_PATH=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/R
+export R_LIBS_PATH=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/library
 export R_LIBS=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/library
 
 rm -rf ${Lock_CNACS_dir}/${sample}
