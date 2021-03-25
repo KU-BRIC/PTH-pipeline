@@ -1,6 +1,6 @@
 ####################################################################################################################
 ####################################################################################################################
-# Classify xenofraft sample reads to human and mouse.
+# Run CNACS for all samples in the batch.
 # Author: Haiying Kong
 # Last Modified: 25 March 2021
 ####################################################################################################################
@@ -10,20 +10,19 @@
 ####################################################################################################################
 ####################################################################################################################
 # Get batch name and number of thread from argument passing.
-while getopts ":d:b:t:" opt
+while getopts ":d:b:" opt
 do
   case $opt in
     d) dir_name="$OPTARG";;
     b) batch="$OPTARG";;
-    t) n_thread="$OPTARG";;
-    \?) echo "Invalid option -$OPTARG" >&3;;
+    \?) echo "Invalid option -$OPTARG" >&2;;
   esac
 done
 n_thread=${n_thread#0}
 
 ####################################################################################################################
 ####################################################################################################################
-# Check if arguments are input from command.
+# Check if argument inputs from command are correct.
 if [ -z "${dir_name}" ]
 then
   echo "Error: Directory name is empty"
@@ -36,58 +35,50 @@ then
   exit 1
 fi
 
-if [ -z "${n_thread}" ]
-then
-  n_thread=8
-fi
-
 ####################################################################################################################
 ####################################################################################################################
 # Define directory for the batch.
-in_dir=/home/projects/cu_10184/projects/${dir_name}/PDXseqData/${batch}/fastq
-out_dir=/home/projects/cu_10184/projects/${dir_name}/PDXseqData/${batch}/xengsort
-human_dir=/home/projects/cu_10184/projects/${dir_name}/PanelSeqData/${batch}/fastq/xengsort
+fq_dir=/home/projects/cu_10184/projects/${dir_name}/PanelSeqData/${batch}/fastq
 batch_dir=/home/projects/cu_10184/projects/${dir_name}/BatchWork/${batch}
 
+# Change to working directory.
+temp_dir=${batch_dir}/temp
+mkdir -p ${temp_dir}
+cd ${temp_dir}
+
 ####################################################################################################################
-# Create new directories to save classified reads.
-rm -rf ${out_dir}
-mkdir -p ${out_dir}
-mkdir ${out_dir}/Human
-mkdir ${out_dir}/Mouse
-mkdir ${out_dir}/Both
-mkdir ${out_dir}/Neither
-mkdir ${out_dir}/Ambiguous
-mkdir ${out_dir}/ReadCount
-
-# Create new directory to soft link human reads.
-rm -rf ${human_dir}
-mkdir -p ${human_dir}
-
-# Create new directories to save log, error, and possible temp files.
-mkdir -p ${batch_dir}
-
+####################################################################################################################
+# Define directories to save log files and error files.
 # log directory:
-mkdir -p ${batch_dir}/log
-log_dir=${batch_dir}/log/xengsort
+log_dir=${batch_dir}/log/CNACS
 rm -rf ${log_dir}
 mkdir ${log_dir}
 
 # error directory:
-mkdir -p ${batch_dir}/error
-error_dir=${batch_dir}/error/xengsort
+error_dir=${batch_dir}/error/CNACS
 rm -rf ${error_dir}
 mkdir ${error_dir}
 
-temp_dir=${batch_dir}/temp
-mkdir -p ${temp_dir}
-
-# Change to work directory.
-cd ${temp_dir}
+####################################################################################################################
+####################################################################################################################
+# Define directories to save intermediate results.
+####################################################################################################################
+Lock_dir=${batch_dir}/Lock
 
 ####################################################################################################################
+# Lock for BAM:
+BAM_dir=${Lock_dir}/BAM
+
+####################################################################################################################
+# Lock for CNV:
+Lock_CNACS_dir=${Lock_dir}/CNV/CNACS
+rm -rf ${Lock_CNACS_dir}
+mkdir ${Lock_CNACS_dir}
+
+####################################################################################################################
+####################################################################################################################
 # Get fastq file names.
-cd ${in_dir}
+cd ${fq_dir}
 fq_files=($(ls *.fq.gz))
 
 ####################################################################################################################
@@ -103,9 +94,9 @@ samples=($(echo ${fq_files[@]%_R*.fq.gz} | tr ' ' '\n' | sort -u | tr '\n' ' '))
 ####################################################################################################################
 for sample in ${samples[@]}
 do
-  qsub -o ${log_dir}/${sample}.log -e ${error_dir}/${sample}.error -N ${batch}_${sample}_xengsort \
-    -v n_thread=${n_thread},sample=${sample},in_dir=${in_dir},out_dir=${out_dir},human_dir=${human_dir},temp_dir=${temp_dir} \
-    /home/projects/cu_10184/projects/PTH/Code/PDX/Classify_Reads/xengsort_job.sh
+  qsub -o ${log_dir}/${sample}.log -e ${error_dir}/${sample}.error -N ${batch}_${sample}_CNACS \
+    -v batch=${batch},sample=${sample},BAM_dir=${BAM_dir},Lock_CNACS_dir=${Lock_CNACS_dir},temp_dir=${temp_dir} \
+    /home/projects/cu_10184/projects/PTH/Code/Primary/CNV/CNACS/CNACS_job.sh
 done
 
 ####################################################################################################################

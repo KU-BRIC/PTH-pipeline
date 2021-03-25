@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 22 March 2021
+# Last Modified: 25 March 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -12,6 +12,7 @@
 #PBS -l walltime=200:00:00
 
 source /home/projects/cu_10184/projects/PTH/Software/envsetup
+conda deactivate
 
 ####################################################################################################################
 ####################################################################################################################
@@ -20,7 +21,7 @@ hg="/home/projects/cu_10184/people/haikon/Reference/GATK/hg38_MaskedU2AF1L5/Homo
 Funcotator_DB="/home/projects/cu_10184/people/haikon/Reference/Funcotator/funcotator_dataSources.v1.7.20200521s"
 
 # Software tools:
-picard="java -jar /home/projects/cu_10145/people/haikon/Software/picard.jar"
+picard="java -jar /home/projects/cu_10184/people/haikon/Software/picard.jar"
 
 ####################################################################################################################
 ####################################################################################################################
@@ -138,10 +139,12 @@ min_read_strand=1
 min_r_alt_ref=0.25
 
 # Run SNVer.
+conda activate
 snver -r $hg -i ${BAM_dir}/${sample}.bam -o ${Lock_SNVer_dir}/vcf/$sample  \
   -l ${target_chr} -n ${num_hap} -het ${het} -mq ${map_qual} -bq ${base_qual} -s ${str_bias}  \
   -f ${fish_thresh} -p ${p_thresh} -a ${min_read_strand} -b ${min_r_alt_ref}
-  
+conda deactivate
+
 # Annotation with Funcotator:
 gatk Funcotator \
   -R $hg -V ${Lock_SNVer_dir}/vcf/${sample}.filter.vcf -O ${Lock_SNVer_dir}/maf/${sample}.snv.maf \
@@ -203,13 +206,14 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter
 ####################################################################################################################
 conda activate CNACS
 
-export JAVAPATH=/home/projects/cu_10145/people/haikon/Software/anaconda3/bin/
-export PICARD_PATH=/home/projects/cu_10145/people/haikon/Software/picard.jar
-export SAMTOOLS_PATH=/home/projects/cu_10145/people/haikon/Software/samtools-1.11/bin
+export JAVAPATH=/home/projects/cu_10184/people/haikon/Software/anaconda3/bin
+export PICARD_PATH=/home/projects/cu_10184/people/haikon/Software/picard.jar
+export SAMTOOLS_PATH=/home/projects/cu_10184/people/haikon/Software/samtools-1.12/bin
 export PERL_PATH=/usr/bin/perl
-export BEDTOOLS_PATH=/home/projects/cu_10145/people/haikon/Software/anaconda3/bin/
-export R_PATH=/home/projects/cu_10145/people/haikon/Software/R-4.0.3/bin/R
-export R_LIBS_PATH=/home/projects/cu_10145/people/haikon/Software/R-4.0.3/library
+export BEDTOOLS_PATH=/home/projects/cu_10184/people/haikon/Software/anaconda3/bin
+export R_PATH=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/R
+export R_LIBS_PATH=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/library
+export R_LIBS=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/library
 
 rm -rf ${Lock_CNACS_dir}/${sample}
 mkdir -p ${Lock_CNACS_dir}/${sample}
@@ -222,6 +226,9 @@ toil_cnacs run \
     --pool_dir /home/projects/cu_10184/projects/PTH/Reference/CNACS/PoN \
     --fasta $hg \
     --samp ${BAM_dir}/${sample}.bam
+
+rm -r ${Lock_CNACS_dir}/${sample}/tmp
+rm -r ${Lock_CNACS_dir}/${sample}/jobstore
 
 conda deactivate
 
@@ -246,11 +253,6 @@ module load R/4.0.3
 module load samtools/1.11
 
 /home/projects/cu_10184/projects/PTH/Code/Source/ITD/SoftClipping/softclip_run.sh -i ${BAM_dir}/${sample}.bam -o ${Lock_SoftClipping_dir} -s $sample -g $hg
-
-####################################################################################################################
-####################################################################################################################
-
-conda deactivate
 
 ####################################################################################################################
 ####################################################################################################################

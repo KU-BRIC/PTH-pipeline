@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong
-# Last Modified: 12 March 2021
+# Last Modified: 25 March 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -12,6 +12,7 @@
 #PBS -l walltime=200:00:00
 
 source /home/projects/cu_10184/projects/PTH/Software/envsetup
+conda deactivate
 
 ####################################################################################################################
 ####################################################################################################################
@@ -138,10 +139,12 @@ min_read_strand=1
 min_r_alt_ref=0.25
 
 # Run SNVer.
+conda activate
 snver -r $hg -i ${BAM_dir}/${sample}.bam -o ${Lock_SNVer_dir}/vcf/$sample  \
   -l ${target_chr} -n ${num_hap} -het ${het} -mq ${map_qual} -bq ${base_qual} -s ${str_bias}  \
   -f ${fish_thresh} -p ${p_thresh} -a ${min_read_strand} -b ${min_r_alt_ref}
-  
+conda deactivate
+
 # Annotation with Funcotator:
 gatk Funcotator \
   -R $hg -V ${Lock_SNVer_dir}/vcf/${sample}.filter.vcf -O ${Lock_SNVer_dir}/maf/${sample}.snv.maf \
@@ -210,6 +213,7 @@ export PERL_PATH=/usr/bin/perl
 export BEDTOOLS_PATH=/home/projects/cu_10145/people/haikon/Software/anaconda3/bin/
 export R_PATH=/home/projects/cu_10145/people/haikon/Software/R-4.0.3/bin/R
 export R_LIBS_PATH=/home/projects/cu_10145/people/haikon/Software/R-4.0.3/library
+export R_LIBS=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/library
 
 rm -rf ${Lock_CNACS_dir}/${sample}
 mkdir -p ${Lock_CNACS_dir}/${sample}
@@ -222,6 +226,9 @@ toil_cnacs run \
     --pool_dir /home/projects/cu_10184/projects/PTH/Reference/CNACS/PoN \
     --fasta $hg \
     --samp ${BAM_dir}/${sample}.bam
+
+rm -r ${Lock_CNACS_dir}/${sample}/tmp
+rm -r ${Lock_CNACS_dir}/${sample}/jobstore
 
 conda deactivate
 
