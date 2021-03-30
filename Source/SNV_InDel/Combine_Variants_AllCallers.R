@@ -2,9 +2,11 @@
 ####################################################################################################################
 # Combine all variants identified from VarDict, SNVer, and LoFreq.
 # Author: Haiying Kong
-# Last Modified: 1 March 2021
+# Last Modified: 29 March 2021
 ####################################################################################################################
 ####################################################################################################################
+#!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
+
 # Set options and clean the space.
 options(stringsAsFactors=FALSE)
 rm(list=ls())

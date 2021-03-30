@@ -2,9 +2,11 @@
 ####################################################################################################################
 # Get coverage frequency and plot density for all samples.
 # Author: Haiying Kong modified by Balthasar
-# Last Modified: 4 March 2017
+# Last Modified: 29 March 2017
 ####################################################################################################################
 ####################################################################################################################
+#!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
+
 args = commandArgs(trailingOnly=TRUE)
 
 bamdir=args[1]

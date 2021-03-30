@@ -1,6 +1,6 @@
 
-R version 4.0.3 (2020-10-10) -- "Bunny-Wunnies Freak Out"
-Copyright (C) 2020 The R Foundation for Statistical Computing
+R version 4.0.4 (2021-02-15) -- "Lost Library Book"
+Copyright (C) 2021 The R Foundation for Statistical Computing
 Platform: x86_64-pc-linux-gnu (64-bit)
 
 R is free software and comes with ABSOLUTELY NO WARRANTY.
@@ -19,12 +19,12 @@ Type 'q()' to quit R.
 
 > ####################################################################################################################
 > ####################################################################################################################
-> # Copy fastq files for primary samples from cu_10145 to cu_10184.
+> # Copy soft-clipping results from cu_10145 to cu_10184.
 > # Author: Haiying Kong
-> # Last Modified: 12 March 2021
+> # Last Modified: 29 March 2021
 > ####################################################################################################################
 > ####################################################################################################################
-> setwd('/home/projects/cu_10184/projects/PTH')
+> setwd('/home/projects/cu_10184/projects/PTH_test/BatchWork/AllBatches/ITD/SoftClipping')
 > options(stringsAsFactors=FALSE)
 > rm(list=ls())
 > 
@@ -33,26 +33,28 @@ Type 'q()' to quit R.
 > ####################################################################################################################
 > # Set values.
 > batch.nums = str_pad(1:11, 3, pad='0')
-> from.dir = '/home/projects/cu_10145/people/haikon/Project/PTH/PanelSeqData'
-> to.dir = '/home/projects/cu_10184/projects/PTH/PanelSeqData'
+> batches = paste0('Batch', batch.nums)
 > 
 > ####################################################################################################################
-> ####################################################################################################################
-> # Copy sequence files for Batch001-011.
-> for (batch.num in batch.nums)   {
-+ 
-+   from.batch = paste0(from.dir, '/Batch', batch.num)
-+   to.batch = paste0(to.dir, '/Primary_', batch.num)
-+ 
-+   if (dir.exists(to.batch))  unlink(to.batch, recursive=TRUE)
-+ 
-+   system(paste0('rsync -r --times --copy-links ', from.batch, '/ ', to.batch))
-+ 
+> # Copy.
+> for (batch in batches)  {
++   dir.name = paste0('/home/projects/cu_10145/people/haikon/Project/PTH/BatchWork/', batch, '/Lock/ITD/SoftClipping')
++   file.names = dir(dir.name)
++   idx = grep('_spcs.tsv', file.names)
++   system(paste0('rm -rf /home/projects/cu_10184/projects/PTH_test/BatchWork/AllBatches/ITD/SoftClipping/', batch))
++   system(paste0('mkdir -p /home/projects/cu_10184/projects/PTH_test/BatchWork/AllBatches/ITD/SoftClipping/', batch, '/spcs'))
++   for (file.name in file.names)  {
++     i = grep('_spcs.tsv', file.name)
++     if (length(i)>0)  {
++       system(paste0('cp /home/projects/cu_10145/people/haikon/Project/PTH/BatchWork/', batch, '/Lock/ITD/SoftClipping/', file.name, ' /home/projects/cu_10184/projects/PTH_test/BatchWork/AllBatches/ITD/SoftClipping/', batch, '/spcs/'))
++       }  else
++       system(paste0('cp /home/projects/cu_10145/people/haikon/Project/PTH/BatchWork/', batch, '/Lock/ITD/SoftClipping/', file.name, ' /home/projects/cu_10184/projects/PTH_test/BatchWork/AllBatches/ITD/SoftClipping/', batch, '/'))
++     }
 +   }
 > 
 > ####################################################################################################################
 > ####################################################################################################################
 > 
 > proc.time()
-    user   system  elapsed 
-1207.267  979.099 6307.834 
+   user  system elapsed 
+  0.429   1.720   5.472 

@@ -61,7 +61,7 @@ samtools view $in_bam $FLT3ITD | cut -f3,4,6,10 | awk -v s=$sample -v OFS="\t" '
         # call spike finding R script
         echo "Finding SoftClip Spikes for $sample"
         MIN_CIGAR_SPIKE=15
-        Rscript /home/projects/cu_10184/projects/PTH/Code/Ensemble/ITD/SoftClipping/softclip_spikes.R $sample $softclip_dir $sample_chr_pos_cigar_seq $MIN_CIGAR_SPIKE $REF_GEN
+        Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/SoftClipping/softclip_spikes.R $sample $softclip_dir $sample_chr_pos_cigar_seq $MIN_CIGAR_SPIKE $REF_GEN
 }
 
 
