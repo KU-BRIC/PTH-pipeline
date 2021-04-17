@@ -52,16 +52,21 @@ function soft_clip_spikes () {
 
         local sample_chr_pos_cigar_seq=$softclip_dir/${sample}_spcs.tsv
 
-        # extract pos cigar seq from BAM from the FLT3 region
+        # extract pos cigar seq from BAM from the FLT3 region and add the reference base at that position
         echo "Extracting FLT3 data from $sample"
-        FLT3ITD="chr13:28033800-28034200"
+        FLT3ITD="chr13:28033800-28034400"
+	if [ ! -f $sample_chr_pos_cigar_seq ]; then
         #samtools view $in_bam $FLT3ITD | cut -f3,4,6,10 | awk -v s=$sample -v OFS="\t" -v refg=$REF_GEN '{print s, $1, $2, $3, $4}' > $sample_chr_pos_cigar_seq
-samtools view $in_bam $FLT3ITD | cut -f3,4,6,10 | awk -v s=$sample -v OFS="\t" '{print s, $1, $2, $3, $4}' | while read s r p c q; do echo -ne "$s\t$r\t$p\t"; samtools faidx $REF_GEN $r:$p-$p | tail -1 | tr -d "\n"; echo -e "\t.\t$c\t$q"; done > $sample_chr_pos_cigar_seq
+	samtools view $in_bam $FLT3ITD | cut -f3,4,6,10 | awk -v s=$sample -v OFS="\t" '{print s, $1, $2, $3, $4}' | while read s r p c q; do echo -ne "$s\t$r\t$p\t"; samtools faidx $REF_GEN $r:$p-$p | tail -1 | tr -d "\n"; echo -e "\t.\t$c\t$q"; done > $sample_chr_pos_cigar_seq
+	fi
+
+	# extract read length (assume it's the largest integer in a CIGAR entry of the form nM, where n is an integer)
+	read_length=$(cut -f6 $sample_chr_pos_cigar_seq | grep -E '^[0-9]+M$' | sort | uniq | tail -1 | grep -Eo '^[0-9]+')
 
         # call spike finding R script
         echo "Finding SoftClip Spikes for $sample"
         MIN_CIGAR_SPIKE=15
-        Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/SoftClipping/softclip_spikes.R $sample $softclip_dir $sample_chr_pos_cigar_seq $MIN_CIGAR_SPIKE $REF_GEN
+        Rscript ./softclip_spikes.R $sample $softclip_dir $sample_chr_pos_cigar_seq $MIN_CIGAR_SPIKE $REF_GEN $read_length 
 }
 
 
