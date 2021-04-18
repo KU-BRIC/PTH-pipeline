@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Get ITDs from all samples.
 # Author: Haiying Kong
-# Last Modified: 12 April 2021
+# Last Modified: 18 April 2021
 ####################################################################################################################
 ####################################################################################################################
 setwd('/home/projects/cu_10184/projects/PTH')
@@ -50,20 +50,24 @@ aster = sapply(apple[ ,6], function(x)  {
                              tmp = unlist(strsplit(tmp, ','))
                              list(tmp)
                              } )
-apple$N_Ref = sapply(aster, function(x) as.numeric(x[1]))
 apple$N_Alt = sapply(aster, function(x) as.numeric(x[2]))
+apple$N_Ref = sapply(aster, function(x) as.numeric(x[1]))
 
 apple = apple[ ,-(5:6)]
+
+# Label validated ITDs.
+apple$Validated = 0
+valid = read.table('/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/Validated.txt', header=TRUE, sep='\t')
+apple$Patient = sapply(apple$Sample, function(x) unlist(strsplit(x, '-CMP'))[1])
+apple$Validated[apple$Patient %in% valid$Patient] = 1
+apple = apple[ ,c('Batch', 'Patient', 'Sample', 'Validated', 'Chrom', 'Start', 'End', 'SVLEN', 'N_Alt', 'N_Ref', 'HOMLEN', 'NTLEN')]
+apple = apple[order(apple$Batch, apple$Patient, apple$Sample, apple$Validated, apple$Start), ]
+
+idx = which(apple$N_Alt>1)
+apple = rbind(apple[idx, ], apple[-idx, ])
+
 write.table(apple, 'AllBatches/ITD/Pindel/Pindel.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
-# write.xlsx(apple, 'AllBatches/ITD/Pindel/Pindel.xlsx', sheetName='Pindel',
-#            row.names=FALSE, col.names=TRUE, append=FALSE)
-
-# Filter for FLT3 exon 13-15.
-apple = apple[apple$Chrom=='chr13', ]
-apple = apple[((apple$Start>28033736 & apple$End<28034141) | (apple$Start>28033931 & apple$End<28034364) | (apple$Start>28034150 & apple$End<28034557)), ]
-
-write.table(apple, 'AllBatches/ITD/Pindel/Pindel_FLT3.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
-write.xlsx(apple, 'AllBatches/ITD/Pindel/Pindel_FLT3.xlsx', sheetName='Pindel',
+write.xlsx(apple, 'AllBatches/ITD/Pindel/Pindel.xlsx', sheetName='Pindel',
            row.names=FALSE, col.names=TRUE, append=FALSE)
 
 ####################################################################################################################

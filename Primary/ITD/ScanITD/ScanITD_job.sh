@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Identify ITD with ScanITD - job.
 # Author: Haiying Kong
-# Last Modified: 16 April 2021
+# Last Modified: 18 April 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -32,7 +32,7 @@ cd ${temp_dir}
 
 ####################################################################################################################
 # Run ScanITD:
-$ScanITD -r $hg -t $target -i ${BAM_dir}/${sample}.bam -o ${Lock_ScanITD_dir}/$sample -c 1 -d 200 -f 0.01 -l 5 -n 3
+$ScanITD -r $hg -t $target -i ${BAM_dir}/${sample}.bam -o ${Lock_ScanITD_dir}/${sample} -m 20 -c 1 -d 100 -f 0.0001 -l 5 -n 3
 conda deactivate
 
 #  -m MAPQ, --mapq MAPQ  minimal MAPQ in BAM for calling ITD (default: 15)
