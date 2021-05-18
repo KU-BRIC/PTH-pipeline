@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 25 March 2021
+# Last Modified: 18 May 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -49,6 +49,7 @@ then
   target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
   target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
   target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
+  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
 elif [ "$panel" = "panel1" ]
 then
   # Find target file for panel version 1.
@@ -56,6 +57,7 @@ then
   target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
   target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
   target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
+  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
 elif [ "$panel" = "panel2" ]
 then
   # Find target file for panel version 1.
@@ -63,6 +65,7 @@ then
   target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
   target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
   target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
+  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
 else
   echo "Error: Please input panel version from command line as panel1 or panel2, or update BatchInfo.txt"
   exit 1
@@ -154,7 +157,9 @@ mkdir ${Lock_DOC_dir}/DensityPlot
 ####################################################################################################################
 # Lock for ITD:
 Lock_ITD_dir=${Lock_dir}/ITD
-Lock_SoftClipping_dir=${Lock_ITD_dir}/SoftClipping
+mkdir -p ${Lock_ITD_dir}/VarDict
+mkdir -p ${Lock_ITD_dir}/Pindel
+mkdir -p ${Lock_ITD_dir}/getITD
 
 ####################################################################################################################
 ####################################################################################################################
@@ -183,6 +188,9 @@ mkdir ${Result_CNACS_dir}
 Result_DOC_dir=${Result_dir}/DOC
 mkdir ${Result_DOC_dir}
 
+Result_ITD_dir=${Result_dir}/ITD
+mkdir ${Result_ITD_dir}
+
 ####################################################################################################################
 ####################################################################################################################
 # Get fastq file names.
@@ -203,7 +211,7 @@ samples=($(echo ${fq_files[@]%_R*.fq.gz} | tr ' ' '\n' | sort -u | tr '\n' ' '))
 for sample in ${samples[@]}
 do
   qsub -o ${log_dir}/${sample}.log -e ${error_dir}/${sample}.error -N ${batch}_${sample}_Ensemble \
-    -v n_thread=${n_thread},target_chr=${target_chr},target_nochr=${target_nochr},target_nopad=${target_nopad},batch=${batch},sample=${sample},fq_dir=${fq_dir},BAM_dir=${BAM_dir},BAM_lock_dir=${BAM_lock_dir},Lock_SNV_InDel_dir=${Lock_SNV_InDel_dir},Lock_VarDict_dir=${Lock_VarDict_dir},Lock_SNVer_dir=${Lock_SNVer_dir},Lock_LoFreq_dir=${Lock_LoFreq_dir},Result_SNV_InDel_dir=${Result_SNV_InDel_dir},Lock_CNACS_dir=${Lock_CNACS_dir},Lock_DOC_dir=${Lock_DOC_dir},Lock_SoftClipping_dir=${Lock_SoftClipping_dir},temp_dir=${temp_dir} \
+    -v n_thread=${n_thread},target_chr=${target_chr},target_nochr=${target_nochr},target_nopad=${target_nopad},target_itd=${target_itd},batch=${batch},sample=${sample},fq_dir=${fq_dir},BAM_dir=${BAM_dir},BAM_lock_dir=${BAM_lock_dir},Lock_SNV_InDel_dir=${Lock_SNV_InDel_dir},Lock_VarDict_dir=${Lock_VarDict_dir},Lock_SNVer_dir=${Lock_SNVer_dir},Lock_LoFreq_dir=${Lock_LoFreq_dir},Result_SNV_InDel_dir=${Result_SNV_InDel_dir},Lock_CNACS_dir=${Lock_CNACS_dir},Lock_DOC_dir=${Lock_DOC_dir},Lock_ITD_dir=${Lock_ITD_dir},Result_ITD_dir=${Result_ITD_dir},temp_dir=${temp_dir} \
     /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble_job.sh
 done
 

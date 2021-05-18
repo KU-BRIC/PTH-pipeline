@@ -1,8 +1,8 @@
 ####################################################################################################################
 ####################################################################################################################
-# Call ITD with getITD for all batches.
+# Submit jobs to identify ITDs for all samples in all batches.
 # Author: Haiying Kong
-# Last Modified: 26 April 2021
+# Last Modified: 18 May 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -15,7 +15,7 @@ batches=(Primary_001 Primary_002 Primary_003 Primary_004 Primary_005 Primary_006
 # Submit jobs for all batches.
 for batch in ${batches[@]}
 do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/getITD/getITD.sh -d PTH -b $batch
+  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/Ensemble/ITD.sh -d PTH -b $batch -t 8
 done
 
 

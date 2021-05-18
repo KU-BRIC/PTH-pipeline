@@ -40,7 +40,7 @@ write.table(apple, 'AllBatches/ITD/getITD/getITD_0.txt', row.names=FALSE, col.na
 apple$Chrom = 'chr13'
 cols = c('batch', 'sample', 'Chrom', 'start_chr13_bp', 'end_chr13_bp', 'domains', 'insertion_site_chr13_bp', 'counts', 'coverage', 'seq')
 apple = apple[ ,cols]
-names(apple) = c('Batch', 'Sample', 'Chrom', 'Start', 'End', 'Domains', 'InsertionSite', 'N_Alt', 'DP', 'Seq')
+names(apple) = c('Batch', 'Sample', 'Chrom', 'End', 'Start', 'Domains', 'InsertionSite', 'N_Alt', 'DP', 'Seq')
 
 # Aggregate for duplicated rows.
 # apple = aggregate(cbind(N_Alt,DP,AB) ~ Batch+Sample+Chrom+Start+End+SVLEN, data=apple, FUN=function(x) paste(x,collapse=','))

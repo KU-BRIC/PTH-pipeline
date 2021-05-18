@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 7 April 2021
+# Last Modified: 18 May 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -19,9 +19,16 @@ conda deactivate
 # Reference databases:
 hg="/home/projects/cu_10184/people/haikon/Reference/GATK/hg38_MaskedU2AF1L5/Homo_sapiens_assembly38_MaskedU2AF1L5.fasta"
 Funcotator_DB="/home/projects/cu_10184/people/haikon/Reference/Funcotator/funcotator_dataSources.v1.7.20200521s"
+target_flt3="/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/FLT3.bed"
+getITD_reference="/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/getITD/amplicon.txt"
+getITD_anno="/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/getITD/amplicon_kayser.tsv"
 
 # Software tools:
 picard="java -jar /home/projects/cu_10184/people/haikon/Software/picard.jar"
+getITD="python3 /home/projects/cu_10184/people/haikon/Software/getITD/getitd.py"
+       
+# Set parameters.
+thresh_n_alt=1
 
 ####################################################################################################################
 ####################################################################################################################
@@ -109,7 +116,7 @@ nmfreq=0.1
 mfreq=0.25
 
 # Run VarDict:
-vardict -G $hg -N $sample -b ${BAM_dir}/${sample}.bam $target_nochr -c 1 -S 2 -E 3 -t  \
+vardict -G $hg -N ${sample} -b ${BAM_dir}/${sample}.bam $target_nochr -c 1 -S 2 -E 3 -t  \
   -f ${allel_freq} -O ${map_qual} -q ${phred} -P ${var_pos} -o ${Qratio} -I ${indel_size}  \
   -M ${min_match} -L ${min_SV} -w ${ins_size} -W ${ins_SD} --nmfreq ${nmfreq} --mfreq ${mfreq}  \
   | teststrandbias.R \
@@ -117,12 +124,12 @@ vardict -G $hg -N $sample -b ${BAM_dir}/${sample}.bam $target_nochr -c 1 -S 2 -E
 
 # Annotation with Funcotator:
 gatk Funcotator \
-  -R $hg -V ${Lock_VarDict_dir}/vcf/$sample.vcf -O ${Lock_VarDict_dir}/maf/${sample}.maf \
+  -R $hg -V ${Lock_VarDict_dir}/vcf/${sample}.vcf -O ${Lock_VarDict_dir}/maf/${sample}.maf \
   --output-file-format MAF --ref-version hg38 --data-sources-path ${Funcotator_DB} \
   --disable-sequence-dictionary-validation
 
 # Fill missing DP and AF in Funcotator maf output.
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_FuncotatorMAF_nonSNVer_job.R ${Lock_VarDict_dir} $sample 'VarDict'
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_FuncotatorMAF_nonSNVer_job.R ${Lock_VarDict_dir} ${sample} 'VarDict'
 
 ####################################################################################################################
 # SNVer:
@@ -140,7 +147,7 @@ min_r_alt_ref=0.25
 
 # Run SNVer.
 conda activate
-snver -r $hg -i ${BAM_dir}/${sample}.bam -o ${Lock_SNVer_dir}/vcf/$sample  \
+snver -r $hg -i ${BAM_dir}/${sample}.bam -o ${Lock_SNVer_dir}/vcf/${sample}  \
   -l ${target_chr} -n ${num_hap} -het ${het} -mq ${map_qual} -bq ${base_qual} -s ${str_bias}  \
   -f ${fish_thresh} -p ${p_thresh} -a ${min_read_strand} -b ${min_r_alt_ref}
 conda deactivate
@@ -156,7 +163,7 @@ gatk Funcotator \
   --disable-sequence-dictionary-validation
 
 # Fill missing DP and AF in Funcotator maf output.
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_FuncotatorMAF_SNVer_job.R ${Lock_SNVer_dir} $sample 'SNVer'
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_FuncotatorMAF_SNVer_job.R ${Lock_SNVer_dir} ${sample} 'SNVer'
 
 ####################################################################################################################
 # LoFreq:
@@ -180,7 +187,7 @@ gatk Funcotator \
   --disable-sequence-dictionary-validation
 
 # Fill missing DP and AF in Funcotator maf output.
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_FuncotatorMAF_nonSNVer_job.R ${Lock_LoFreq_dir} $sample 'LoFreq'
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_FuncotatorMAF_nonSNVer_job.R ${Lock_LoFreq_dir} ${sample} 'LoFreq'
 
 ####################################################################################################################
 # Combine SNV_InDel variants from 3 callers and filter.
@@ -243,16 +250,58 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/DOC/HelloRanges_one_sam
 
 ####################################################################################################################
 ####################################################################################################################
-# FLT3 Softclip
+# ITD identification on FLT3.
 ####################################################################################################################
-module load tools ngs
-module load parallel/20200922
-module load gcc
-module load intel/perflibs
-module load R/4.0.3
-module load samtools/1.11
+####################################################################################################################
+# VarDict:
+####################################################################################################################
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/VarDict_FilterClean.R ${batch} ${sample} ${Lock_VarDict_dir} ${Lock_ITD_dir}/VarDict
 
-/home/projects/cu_10184/projects/PTH/Code/Source/ITD/SoftClipping/softclip_run.sh -i ${BAM_dir}/${sample}.bam -o ${Lock_SoftClipping_dir} -s $sample -g $hg
+####################################################################################################################
+# Pindel:
+####################################################################################################################
+# Run Pindel.
+conda activate
+echo -e ${BAM_dir}/${sample}.bam"\t"250"\t"${sample} > ${Lock_ITD_dir}/Pindel/${sample}_config.txt
+pindel -f $hg -t ${target_itd} -c chr13:28033736-28034557  \
+       -i ${Lock_ITD_dir}/Pindel/${sample}_config.txt -o ${Lock_ITD_dir}/Pindel/${sample}  \
+       -T $n_thread -x 3 -u 0.04
+rm ${Lock_ITD_dir}/Pindel/${sample}_config.txt
+pindel2vcf -p ${Lock_ITD_dir}/Pindel/${sample}_TD -r $hg -R HG38 -d 20201224 -v ${Lock_ITD_dir}/Pindel/${sample}.vcf
+conda deactivate
+
+# Clean the output vcf.
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/Pindel_Clean.R ${batch} ${sample} ${Lock_ITD_dir}/Pindel
+
+####################################################################################################################
+# getITD:
+####################################################################################################################
+# Filter bam file with target bed file and conver it to fastq.
+mkdir ${Lock_ITD_dir}/getITD/${sample}
+cd ${Lock_ITD_dir}/getITD/${sample}
+bedtools intersect -abam ${BAM_dir}/${sample}.bam -b ${target_flt3} -u > FLT3.bam
+# samtools view -b ${BAM_dir}/${sample}.bam chr13:28033736-28034557 > FLT3.bam
+samtools sort -n FLT3.bam > tmp.bam
+mv tmp.bam FLT3.bam
+bedtools bamtofastq -i FLT3.bam -fq FLT3_R1.fq -fq2 FLT3_R2.fq
+
+# Run getITD.
+conda activate getITD
+$getITD -reference ${getITD_reference} -anno ${getITD_anno} -infer_sense_from_alignment True -plot_coverage True -require_indel_free_primers False -min_read_length 50 -min_bqs 20 -min_read_copies 1 -filter_ins_vaf 0.001 ${sample} FLT3_R1.fq FLT3_R2.fq
+conda deactivate
+
+# Clean the output folder.
+rm FLT3*
+mv ${sample}_getitd/* ./
+rm -r ${sample}_getitd
+
+# Clean the output tsv.
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/getITD_Clean.R ${batch} ${sample} ${Lock_ITD_dir}/getITD
+
+####################################################################################################################
+# Combine and the results to come up with final ITD list.
+####################################################################################################################
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/Pindel_getITD_VarDictAnno.R ${batch} ${sample} ${Lock_ITD_dir} ${Result_ITD_dir} ${thresh_n_alt}
 
 ####################################################################################################################
 ####################################################################################################################
