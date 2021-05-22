@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Identify ITDs with Pindel and getITD, combine filter results with help from VarDict - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 18 May 2021
+# Last Modified: 19 May 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -84,7 +84,7 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/getITD_Clean.R ${ba
 ####################################################################################################################
 # Combine and the results to come up with final ITD list.
 ####################################################################################################################
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/Pindel_getITD_VarDictAnno.R ${batch} ${sample} ${Lock_ITD_dir} ${Result_ITD_dir} ${thresh_n_alt}
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/CombineFilter_Pindel_getITD_VarDictAnno.R ${batch} ${sample} ${Lock_ITD_dir} ${Result_ITD_dir} ${thresh_n_alt}
 
 ####################################################################################################################
 ####################################################################################################################

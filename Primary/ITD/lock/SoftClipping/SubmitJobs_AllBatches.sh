@@ -1,8 +1,8 @@
 ####################################################################################################################
 ####################################################################################################################
-# Submit jobs to identify ITDs for all samples in all batches.
+# Call ITD with soft-clipping for all batches.
 # Author: Haiying Kong
-# Last Modified: 18 May 2021
+# Last Modified: 28 March 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -10,12 +10,12 @@
 ####################################################################################################################
 ####################################################################################################################
 # Batches:
-batches=(Primary_001 Primary_002 Primary_003 Primary_004 Primary_005 Primary_006 Primary_007 Primary_008 Primary_009 Primary_010 Primary_011 Primary_012 Primary_013)
+batches=(Batch001 Batch002 Batch003 Batch004 Batch005 Batch006 Batch007 Batch008 Batch009 Batch010 Batch011)
 
 # Submit jobs for all batches.
 for batch in ${batches[@]}
 do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/Ensemble/ITD.sh -d PTH -b $batch -t 8
+  sh /home/projects/cu_10145/people/haikon/Project/PTH/Code/ITD/SoftClipping/SoftClipping.sh -b $batch
 done
 
 
