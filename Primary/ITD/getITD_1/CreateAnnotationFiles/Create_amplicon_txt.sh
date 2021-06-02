@@ -1,23 +1,22 @@
 ####################################################################################################################
 ####################################################################################################################
-# Call ITD with ScanITD for all batches.
+# Create annotation files to run getITD.
 # Author: Haiying Kong
-# Last Modified: 1 June 2021
+# Last Modified: 15 April 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
 
+source /home/projects/cu_10184/projects/PTH/Software/envsetup
+conda deactivate
+
 ####################################################################################################################
 ####################################################################################################################
-# Batches:
-batches=(Primary_001 Primary_002 Primary_003 Primary_004 Primary_005 Primary_006 Primary_007 Primary_008 Primary_009 Primary_010 Primary_011 Primary_012 Primary_013)
+# Reference databases:
+hg="/home/projects/cu_10184/people/haikon/Reference/GATK/hg38_MaskedU2AF1L5/Homo_sapiens_assembly38_MaskedU2AF1L5.fasta"
 
-# Submit jobs for all batches.
-for batch in ${batches[@]}
-do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/ScanITD/ScanITD.sh -d PTH -b $batch
-done
-
+# amplicon.txt
+samtools faidx $hg chr13:28033736-28034557 > /home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/getITD/amplicon.txt
 
 ####################################################################################################################
 ####################################################################################################################

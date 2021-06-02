@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Identify ITDs with Pindel and getITD, combine filter results with help from VarDict - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 19 May 2021
+# Last Modified: 2 June 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -23,9 +23,11 @@ getITD_reference="/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/getI
 getITD_anno="/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/getITD/amplicon_kayser.tsv"
 
 # Software tools:
+ScanITD="/home/projects/cu_10184/people/haikon/Software/ScanITD/ScanITD.py"
 getITD="python3 /home/projects/cu_10184/people/haikon/Software/getITD/getitd.py"
 
 # Set parameters.
+scheme="Scheme_2"
 thresh_n_alt=1
 
 ####################################################################################################################
@@ -38,7 +40,7 @@ cd ${temp_dir}
 ####################################################################################################################
 # VarDict:
 ####################################################################################################################
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/VarDict_FilterClean.R ${batch} ${sample} ${Lock_VarDict_dir} ${Lock_ITD_dir}/VarDict
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${scheme}/VarDict_FilterClean.R ${batch} ${sample} ${Lock_VarDict_dir} ${Lock_ITD_dir}/VarDict
 
 ####################################################################################################################
 # Pindel:
@@ -54,7 +56,26 @@ pindel2vcf -p ${Lock_ITD_dir}/Pindel/${sample}_TD -r $hg -R HG38 -d 20201224 -v 
 conda deactivate
 
 # Clean the output vcf.
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/Pindel_Clean.R ${batch} ${sample} ${Lock_ITD_dir}/Pindel
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${scheme}/Pindel_Clean.R ${batch} ${sample} ${Lock_ITD_dir}/Pindel
+
+####################################################################################################################
+# ScanITD:
+####################################################################################################################
+# Run ScanITD.
+conda activate ScanITD
+$ScanITD -r $hg -t ${target_itd} -i ${BAM_dir}/${sample}.bam -o ${Lock_ITD_dir}/ScanITD/${sample} -m 20 -c 1 -d 100 -f 0.0001 -l 5 -n 3
+conda deactivate
+
+#  -m MAPQ, --mapq MAPQ  minimal MAPQ in BAM for calling ITD (default: 15)
+#  -c AO, --ao AO        minimal observation count for ITD (default: 4)
+#  -d DP, --depth DP     minimal depth to call ITD (default: 10)
+#  -f VAF, --vaf VAF     minimal variant allele frequency (default: 0.1)
+#  -l ITD_LEN, --len ITD_LEN
+#                        minimal ITD length to report (default: 10)
+#  -n MISMATCH           maximum allowed mismatch bases of pairwise local alignment (default: 3)
+
+# Clean the output tsv.
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${scheme}/ScanITD_Clean.R ${batch} ${sample} ${Lock_ITD_dir}/ScanITD
 
 ####################################################################################################################
 # getITD:
@@ -79,12 +100,37 @@ mv ${sample}_getitd/* ./
 rm -r ${sample}_getitd
 
 # Clean the output tsv.
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/getITD_Clean.R ${batch} ${sample} ${Lock_ITD_dir}/getITD
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${scheme}/getITD_Clean.R ${batch} ${sample} ${Lock_ITD_dir}/getITD
 
 ####################################################################################################################
-# Combine and the results to come up with final ITD list.
+# IGV:
 ####################################################################################################################
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/CombineFilter_Pindel_getITD_VarDictAnno.R ${batch} ${sample} ${Lock_ITD_dir} ${Result_ITD_dir} ${thresh_n_alt}
+
+ln -s ${BAM_dir}/${sample}.bai ${BAM_dir}/${sample}.bam.bai
+
+cat > ${Lock_ITD_dir}/IGV/${sample}_batch.bat << EOF
+new 
+genome hg38 
+snapshotDirectory ${Lock_ITD_dir}/IGV 
+load ${BAM_dir}/${sample}.bam
+maxPanelHeight -1 
+preference SAM.SHOW_SOFT_CLIPPED TRUE
+goto chr13:28033736-28034557
+snapshot ${sample}.png 
+exit
+EOF
+
+cat ${Lock_ITD_dir}/IGV/${sample}_batch.bat
+
+/home/projects/cu_10184/people/haikon/Software/IGV_Linux_2.9.0/igv_auto.sh -b ${Lock_ITD_dir}/IGV/${sample}_batch.bat
+
+rm ${BAM_dir}/${sample}.bam.bai
+rm ${Lock_ITD_dir}/IGV/${sample}_batch.bat
+
+####################################################################################################################
+# Combine the outcome from different tools to come up with final ITD list.
+####################################################################################################################
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${scheme}/CombineFilter_Pindel_getITD_VarDictAnno.R ${batch} ${sample} ${Lock_ITD_dir} ${Result_ITD_dir} ${thresh_n_alt}
 
 ####################################################################################################################
 ####################################################################################################################

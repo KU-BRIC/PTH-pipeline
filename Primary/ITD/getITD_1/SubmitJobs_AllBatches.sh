@@ -1,6 +1,6 @@
 ####################################################################################################################
 ####################################################################################################################
-# Call ITD with ScanITD for all batches.
+# Submit jobs to identify ITDs for all samples in all batches.
 # Author: Haiying Kong
 # Last Modified: 1 June 2021
 ####################################################################################################################
@@ -15,7 +15,7 @@ batches=(Primary_001 Primary_002 Primary_003 Primary_004 Primary_005 Primary_006
 # Submit jobs for all batches.
 for batch in ${batches[@]}
 do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/ScanITD/ScanITD.sh -d PTH -b $batch
+  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/getITD_1/getITD.sh -d PTH -b $batch
 done
 
 

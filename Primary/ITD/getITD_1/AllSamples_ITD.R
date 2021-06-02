@@ -1,0 +1,62 @@
+####################################################################################################################
+####################################################################################################################
+# Get ITDs from all samples.
+# Author: Haiying Kong
+# Last Modified: 18 April 2021
+####################################################################################################################
+####################################################################################################################
+setwd('/home/projects/cu_10184/projects/PTH')
+options(stringsAsFactors=FALSE)
+rm(list=ls())
+
+library(stringr)
+library(xlsx)
+
+####################################################################################################################
+####################################################################################################################
+# Get batch names.
+batch.nums = str_pad(1:12, 3, pad='0')
+batches = paste0('Primary_', batch.nums)
+
+# Pickup ITDs from all samples.
+apple = c()
+for (batch in batches)  {
+  batch.dir = paste0('BatchWork/', batch, '/Lock/ITD/getITD/')
+  samples = dir(batch.dir)
+
+  for (sam in samples)  {
+    sam.dir = paste0(batch.dir, sam)
+    itd.file = paste0(sam.dir, '/itds_collapsed-is-same_is-similar_is-close_is-same_trailing_hc.tsv')
+    if (file.exists(itd.file))  {
+      aster = read.table(itd.file, header=TRUE, sep='\t')
+      apple = rbind(apple, cbind(batch, sam, aster))
+      }
+    }
+  }
+
+write.table(apple, 'AllBatches/ITD/getITD/getITD_0.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
+
+# Clean and sort the result.
+apple$Chrom = 'chr13'
+cols = c('batch', 'sample', 'Chrom', 'start_chr13_bp', 'end_chr13_bp', 'domains', 'insertion_site_chr13_bp', 'counts', 'coverage', 'seq')
+apple = apple[ ,cols]
+names(apple) = c('Batch', 'Sample', 'Chrom', 'End', 'Start', 'Domains', 'InsertionSite', 'N_Alt', 'DP', 'Seq')
+
+# Aggregate for duplicated rows.
+# apple = aggregate(cbind(N_Alt,DP,AB) ~ Batch+Sample+Chrom+Start+End+SVLEN, data=apple, FUN=function(x) paste(x,collapse=','))
+
+# Label validated ITDs.
+apple$Validated = 0
+valid = read.table('/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/Validated.txt', header=TRUE, sep='\t')
+apple$Patient = sapply(apple$Sample, function(x) unlist(strsplit(x, '-CMP'))[1])
+apple$Validated[apple$Patient %in% valid$Patient] = 1
+apple = apple[ ,c('Batch', 'Patient', 'Sample', 'Validated', 'Chrom', 'Start', 'End', 'Domains', 'InsertionSite', 'N_Alt', 'DP', 'Seq')]
+apple = apple[order(apple$Batch, apple$Patient, apple$Sample, apple$Validated, apple$End), ]
+
+# Save the results.
+write.table(apple, 'AllBatches/ITD/getITD/getITD.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
+write.xlsx(apple, 'AllBatches/ITD/getITD/getITD.xlsx', sheetName='getITD',
+           row.names=FALSE, col.names=TRUE, append=FALSE)
+
+####################################################################################################################
+####################################################################################################################

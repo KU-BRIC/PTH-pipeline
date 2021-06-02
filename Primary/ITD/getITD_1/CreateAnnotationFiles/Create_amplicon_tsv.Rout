@@ -1,0 +1,126 @@
+
+R version 4.0.4 (2021-02-15) -- "Lost Library Book"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ####################################################################################################################
+> ####################################################################################################################
+> # Create amplicon_kayser.tsv an annotation file for getITD.
+> # Author: Haiying Kong
+> # Last Modified: 15 April 2021
+> ####################################################################################################################
+> ####################################################################################################################
+> setwd('/home/projects/cu_10184/projects/PTH')
+> options(stringsAsFactors=FALSE)
+> rm(list=ls())
+> 
+> library(GenomicRanges)
+Loading required package: stats4
+Loading required package: BiocGenerics
+Loading required package: parallel
+
+Attaching package: ‘BiocGenerics’
+
+The following objects are masked from ‘package:parallel’:
+
+    clusterApply, clusterApplyLB, clusterCall, clusterEvalQ,
+    clusterExport, clusterMap, parApply, parCapply, parLapply,
+    parLapplyLB, parRapply, parSapply, parSapplyLB
+
+The following objects are masked from ‘package:stats’:
+
+    IQR, mad, sd, var, xtabs
+
+The following objects are masked from ‘package:base’:
+
+    anyDuplicated, append, as.data.frame, basename, cbind, colnames,
+    dirname, do.call, duplicated, eval, evalq, Filter, Find, get, grep,
+    grepl, intersect, is.unsorted, lapply, Map, mapply, match, mget,
+    order, paste, pmax, pmax.int, pmin, pmin.int, Position, rank,
+    rbind, Reduce, rownames, sapply, setdiff, sort, table, tapply,
+    union, unique, unsplit, which.max, which.min
+
+Loading required package: S4Vectors
+
+Attaching package: ‘S4Vectors’
+
+The following object is masked from ‘package:base’:
+
+    expand.grid
+
+Loading required package: IRanges
+Loading required package: GenomeInfoDb
+> library(TxDb.Hsapiens.UCSC.hg38.knownGene)
+Loading required package: GenomicFeatures
+Loading required package: AnnotationDbi
+Loading required package: Biobase
+Welcome to Bioconductor
+
+    Vignettes contain introductory material; view with
+    'browseVignettes()'. To cite Bioconductor, see
+    'citation("Biobase")', and for packages 'citation("pkgname")'.
+
+> 
+> ####################################################################################################################
+> ####################################################################################################################
+> # Load exon database, create target file and filter for exons on target.
+> txdb = TxDb.Hsapiens.UCSC.hg38.knownGene
+> exon = exons(txdb)
+> target = GRanges(seqnames = rep('chr13', 3),
++                  ranges = IRanges(start=c(28033736,28033931,28034150), end=c(28034141,28034364,28034557)))
+> exon = as.data.frame(subsetByOverlaps(exon, target))
+> target = as.data.frame(target)
+> 
+> ####################################################################################################################
+> # Create a data.frame for all positions on target as rows.
+> aster = (target$end[nrow(target)]:target$start[1])
+> apple = data.frame(amplicon_bp = 1:length(aster),
++                    region = NA,
++                    chr13_bp = aster,
++                    transcript_bp = '.',
++                    protein_as = '.')
+> 
+> ####################################################################################################################
+> # Annotate for 3 exons.
+> i.exon = 15
+> for (i in nrow(exon):1)  {
++   ii = which(apple$chr13_bp>=exon$start[i] & apple$chr13_bp<=exon$end[i])
++   apple$region[ii] = paste0('exon', i.exon)
++   i.exon = i.exon - 1
++   apple$transcript_bp[ii] = as.character(1:length(ii))
++   apple$protein_as[ii] = as.character(as.integer((as.integer(apple$transcript_bp[ii])-0.1)/3) + 1)
++   }
+>   
+> apple$region[apple$chr13_bp>exon$end[3]] = 'intron_15'
+> apple$region[apple$chr13_bp>exon$end[2] & apple$chr13_bp<exon$start[3]] = 'intron_14'
+> apple$region[apple$chr13_bp>exon$end[1] & apple$chr13_bp<exon$start[2]] = 'intron_13'
+> apple$region[apple$chr13_bp<exon$start[1]] = 'intron_12'
+> 
+> # Add one more row after one last row.
+> n = nrow(apple)
+> apple[(n+1), ] = apple[n, ]
+> apple$chr13_bp[n+1] = apple$chr13_bp[n+1] - 1
+> apple$amplicon_bp[n+1] = apple$amplicon_bp[n+1] + 1
+> 
+> write.table(apple, 'Reference/ITD/FLT3_1/getITD/amplicon_kayser.tsv', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
+> 
+> ####################################################################################################################
+> ####################################################################################################################
+> 
+> proc.time()
+   user  system elapsed 
+ 10.837   0.595  14.585 

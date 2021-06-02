@@ -1,6 +1,6 @@
 ####################################################################################################################
 ####################################################################################################################
-# Call ITD with ScanITD for all batches.
+# Identify ITD with ScanITD.
 # Author: Haiying Kong
 # Last Modified: 1 June 2021
 ####################################################################################################################
@@ -9,15 +9,25 @@
 
 ####################################################################################################################
 ####################################################################################################################
-# Batches:
-batches=(Primary_001 Primary_002 Primary_003 Primary_004 Primary_005 Primary_006 Primary_007 Primary_008 Primary_009 Primary_010 Primary_011 Primary_012 Primary_013)
+# Get batch names.
+batches=($(seq -f "%03g" 1 13))
+batches=("${batches[@]/#/Primary_}")
 
-# Submit jobs for all batches.
+# Run cleaning ScanITD for all samples 
 for batch in ${batches[@]}
 do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/ScanITD/ScanITD.sh -d PTH -b $batch
-done
+  lock_dir=/home/projects/cu_10184/data/projects/PTH/BatchWork/$batch/Lock/ITD/ScanITD
 
+  # Get list of samples.
+  cd ${lock_dir}
+  vcf_files=($(ls *.itd.vcf))
+  samples=($(echo ${vcf_files[@]%.itd.vcf} | tr ' ' '\n' | sort -u | tr '\n' ' '))
+
+  for sample in ${samples[@]}
+  do
+    Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/Scheme_2/ScanITD_Clean.R ${batch} ${sample} ${lock_dir}
+  done
+done
 
 ####################################################################################################################
 ####################################################################################################################

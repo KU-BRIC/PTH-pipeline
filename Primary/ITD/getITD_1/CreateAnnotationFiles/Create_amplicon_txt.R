@@ -1,23 +1,32 @@
 ####################################################################################################################
 ####################################################################################################################
-# Call ITD with ScanITD for all batches.
+# Create amplicon_kayser.tsv an annotation file for getITD.
 # Author: Haiying Kong
-# Last Modified: 1 June 2021
+# Last Modified: 15 April 2021
 ####################################################################################################################
 ####################################################################################################################
-#!/bin/bash -i
+setwd('/home/projects/cu_10184/projects/PTH')
+options(stringsAsFactors=FALSE)
+rm(list=ls())
+
+library(Biostrings)
 
 ####################################################################################################################
 ####################################################################################################################
-# Batches:
-batches=(Primary_001 Primary_002 Primary_003 Primary_004 Primary_005 Primary_006 Primary_007 Primary_008 Primary_009 Primary_010 Primary_011 Primary_012 Primary_013)
+# Read in the fasta file.
+fa = read.table('Reference/ITD/FLT3_1/getITD/amplicon.txt', header=FALSE, sep='\t')
+dna = fa[-grep('^>', fa[ ,1]), 1]
+dna = paste(dna, collapse='')
 
-# Submit jobs for all batches.
-for batch in ${batches[@]}
-do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/ScanITD/ScanITD.sh -d PTH -b $batch
-done
+# Reverse the string and convert to lower case because FLT3 is encoded on negative strand.
+dna = strsplit(dna, NULL)[[1]]
+dna = paste(dna, collapse='')
+dna = DNAString(dna)
+dna = reverseComplement(dna)
+dna = as.character(dna)
 
+# Save the results.
+write.table(dna, 'Reference/ITD/FLT3_1/getITD/amplicon.txt', row.names=FALSE, col.names=FALSE, quote=FALSE, sep='\t')
 
 ####################################################################################################################
 ####################################################################################################################
