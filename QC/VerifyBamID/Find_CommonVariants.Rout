@@ -1,0 +1,103 @@
+
+R version 4.0.4 (2021-02-15) -- "Lost Library Book"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ####################################################################################################################
+> ####################################################################################################################
+> # Find common variants from our variant calls.
+> # Author: Haiying Kong
+> # Last Modified: 10 June 2021
+> ####################################################################################################################
+> ####################################################################################################################
+> setwd('/home/projects/cu_10184/projects/PTH')
+> options(stringsAsFactors=FALSE)
+> rm(list=ls())
+> 
+> library(stringr)
+> 
+> # Set parameters.
+> maf.cols = c('Batch', 'Sample', 'Hugo_Symbol', 'Chromosome', 'Start_Position', 'Reference_Allele', 'Tumor_Seq_Allele2', 'AF', 'DP')
+> maf.cols.new = c('Batch', 'Sample', 'Hugo_Symbol', 'Chrom', 'Start', 'Ref', 'Alt')
+> thresh.dp = 100
+> thresh.af = 0.10
+> thresh.norm.n = 30
+> thresh.tumor.freq.1 = 0.50
+> thresh.tumor.freq.2 = 0.65
+> 
+> ####################################################################################################################
+> ####################################################################################################################
+> # Read in sample information.
+> sam.info = read.table('Meta/SampleInfo.txt', header=TRUE, sep='\t')
+> normals = sam.info[(sam.info$Group=='NORMAL'), ]
+> # normals = normals[-grep('PTHRK',normals$PTH_ID), ]
+> 
+> # Get batch names.
+> batch.nums = str_pad(1:13, 3, pad='0')
+> batches = paste0('Primary_', batch.nums)
+> 
+> # Pickup ITDs from all samples.
+> apple = c()
+> 
+> for (batch in batches)  {
++   maf.dir = paste0('BatchWork/', batch, '/Result/SNV_InDel/AllVariants/Callers_Wide/')
++   maf.files = dir(maf.dir)
++ 
++   for (maf.file in maf.files)  {
++     maf = read.table(paste0(maf.dir, maf.file), header=TRUE, quote='', fill=TRUE, sep='\t')
++     maf = maf[(maf$Variant_Type=='SNP' & maf$DP>thresh.dp & maf$AF>thresh.af), maf.cols]
++     maf = maf[!is.na(maf$Batch), -match(c('AF','DP'), names(maf))]
++     apple = rbind(apple, maf)
++     }
++   }
+> 
+> names(apple) = maf.cols.new
+> 
+> ####################################################################################################################
+> # Identify potential SNP from normals.
+> idx = which(apple$Sample %in% normals$Sample_ID)
+> aster = unique(apple[idx, ])
+> aster$Flag = 1
+> aster = aggregate(Flag~Hugo_Symbol+Chrom+Start+Ref+Alt, data=aster, sum)
+> snp.norm = aster[aster$Flag>thresh.norm.n, 2:5]
+> # snp.norm = snp.norm[snp.norm$Hugo_Symbol!='Unknown', ]
+> names(snp.norm)[1] = '#Chrom'
+> 
+> # Save the results.
+> write.table(snp.norm, 'Reference/FASTQuick/OurSample/CommonVariants_Norm.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
+> 
+> ####################################################################################################################
+> # Identify potential SNP from tumor.
+> idx = which(!(apple$Sample %in% normals$Sample_ID))
+> aster = unique(apple[idx, ])
+> aster$Flag = 1
+> aster = aggregate(Flag~Hugo_Symbol+Chrom+Start+Ref+Alt, data=aster, sum)
+> n.tumor = length(unique(apple$Sample)) - length(unique(normals$Sample))
+> snp.tumor = aster[(aster$Flag>n.tumor*thresh.tumor.freq.1 & aster$Flag<n.tumor*thresh.tumor.freq.2), 2:5]
+> names(snp.tumor)[1] = '#Chrom'
+> 
+> snp.all = rbind(snp.norm, snp.tumor)
+> 
+> # Save the results.
+> write.table(snp.all, 'Reference/FASTQuick/OurSample/CommonVariants_All.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
+> 
+> ####################################################################################################################
+> ####################################################################################################################
+> 
+> proc.time()
+   user  system elapsed 
+180.258   1.906 190.257 

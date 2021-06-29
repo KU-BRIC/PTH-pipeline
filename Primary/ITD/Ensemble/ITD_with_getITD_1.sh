@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Identify ITDs with Pindel and getITD, combine filter results with help from VarDict.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 3 June 2021
+# Last Modified: 2 June 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -109,14 +109,12 @@ Lock_VarDict_dir=${Lock_dir}/SNV_InDel/VarDict
 Lock_ITD_dir=${Lock_dir}/ITD
 # mv ${Lock_ITD_dir} ${Lock_ITD_dir}_trash 2>/dev/null
 # rm -rf ${Lock_ITD_dir}_trash 2>/dev/null &
-if [ -d "${Lock_ITD_dir}" ]
-then
-  mv ${Lock_ITD_dir} /home/projects/cu_10184/projects/${dir_name}/temp/${batch}
-fi
+mv ${Lock_ITD_dir} /home/projects/cu_10184/projects/${dir_name}/temp/${batch}
 mkdir -p ${Lock_ITD_dir}/VarDict
 mkdir -p ${Lock_ITD_dir}/Pindel
 mkdir -p ${Lock_ITD_dir}/ScanITD
 mkdir -p ${Lock_ITD_dir}/getITD
+mkdir -p ${Lock_ITD_dir}/getITD_1
 mkdir -p ${Lock_ITD_dir}/IGV
 
 ####################################################################################################################

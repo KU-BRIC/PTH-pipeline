@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Clean the vcf file from Pindel.
 # Author: Haiying Kong
-# Last Modified: 1 June 2021
+# Last Modified: 25 June 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
@@ -38,10 +38,10 @@ if (n.rows > 0)  {
                                list(tmp)
                                } )
   apple$End = sapply(aster, function(x) as.numeric(sub('END=', '', x[1])))
-  apple$Length = sapply(aster, function(x) as.numeric(sub('SVLEN=', '', x[3])))
+  apple$SVLEN = sapply(aster, function(x) as.numeric(sub('SVLEN=', '', x[3])))
   apple$Type = sapply(aster, function(x) sub('SVTYPE=', '', x[4]))
-  # apple$HOMLEN = sapply(aster, function(x) as.numeric(sub('HOMLEN=', '', x[2])))
-  # apple$NTLEN = sapply(aster, function(x) as.numeric(sub('NTLEN=', '', x[5])))
+  apple$NTLEN = sapply(aster, function(x) as.numeric(sub('NTLEN=', '', x[5])))
+  apple$Length = apple$SVLEN + apple$NTLEN
 
   aster = sapply(apple[ ,7], function(x)  {
                                tmp = unlist(strsplit(x, ':'))[2]
@@ -51,10 +51,10 @@ if (n.rows > 0)  {
   apple$N_Alt = sapply(aster, function(x) as.numeric(x[2]))
   N_Ref = sapply(aster, function(x) as.numeric(x[1]))
   apple$DP = apple$N_Alt + N_Ref
-  apple$AF = apple$N_Alt / apple$DP
+  apple$AF = round(apple$N_Alt/apple$DP, 4)
 
   apple = apple[ ,-(6:7)]
-  apple = apple[ ,c('Batch', 'Sample', 'Chrom', 'Start', 'End', 'Length', 'N_Alt', 'DP', 'AF', 'Type')]
+  apple = apple[ ,c('Batch', 'Sample', 'Chrom', 'Start', 'End', 'Length', 'N_Alt', 'DP', 'AF', 'Type', 'SVLEN', 'NTLEN')]
   apple = apple[order(apple$Batch, apple$Sample, apple$Start), ]
 
   idx = which(apple$N_Alt>1)

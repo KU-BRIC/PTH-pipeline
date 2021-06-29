@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 18 May 2021
+# Last Modified: 28 June 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -46,26 +46,14 @@ then
     echo "Error: BatchInfo.txt does not have any information for this batch."
     exit 1
   fi
-  target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
-  target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
-  target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
-  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
 elif [ "$panel" = "panel1" ]
 then
   # Find target file for panel version 1.
   target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38
-  target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
-  target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
-  target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
-  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
 elif [ "$panel" = "panel2" ]
 then
   # Find target file for panel version 1.
   target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38_190919225222_updated-to-v2
-  target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
-  target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
-  target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
-  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
 else
   echo "Error: Please input panel version from command line as panel1 or panel2, or update BatchInfo.txt"
   exit 1
@@ -89,7 +77,7 @@ mkdir -p ${batch_dir}
 
 # Change to working directory.
 temp_dir=${batch_dir}/temp
-mkdir -p ${temp_dir}
+mkdir ${temp_dir}
 cd ${temp_dir}
 
 ####################################################################################################################
@@ -109,87 +97,76 @@ mkdir ${error_dir}
 ####################################################################################################################
 # Define directories to save intermediate results.
 ####################################################################################################################
-Lock_dir=${batch_dir}/Lock
-mkdir ${Lock_dir}
+mkdir ${batch_dir}/Lock
 
 ####################################################################################################################
 # Lock for BAM:
-BAM_dir=${Lock_dir}/BAM
-mkdir ${BAM_dir}
-
-BAM_lock_dir=${BAM_dir}/lock
-mkdir ${BAM_lock_dir}
+mkdir -p ${batch_dir}/Lock/BAM/lock
 
 ####################################################################################################################
 # Lock for variant calling:
-Lock_SNV_InDel_dir=${Lock_dir}/SNV_InDel
-mkdir ${Lock_SNV_InDel_dir}
-
-Lock_VarDict_dir=${Lock_SNV_InDel_dir}/VarDict
-mkdir ${Lock_VarDict_dir}
-mkdir ${Lock_VarDict_dir}/vcf
-mkdir ${Lock_VarDict_dir}/maf
-
-Lock_SNVer_dir=${Lock_SNV_InDel_dir}/SNVer
-mkdir ${Lock_SNVer_dir}
-mkdir ${Lock_SNVer_dir}/vcf
-mkdir ${Lock_SNVer_dir}/maf
-
-Lock_LoFreq_dir=${Lock_SNV_InDel_dir}/LoFreq
-mkdir ${Lock_LoFreq_dir}
-mkdir ${Lock_LoFreq_dir}/vcf
-mkdir ${Lock_LoFreq_dir}/maf
+mkdir ${batch_dir}/Lock/SNV_InDel
+mkdir ${batch_dir}/Lock/SNV_InDel/VarDict
+mkdir ${batch_dir}/Lock/SNV_InDel/VarDict/vcf
+mkdir ${batch_dir}/Lock/SNV_InDel/VarDict/maf
+mkdir ${batch_dir}/Lock/SNV_InDel/SNVer
+mkdir ${batch_dir}/Lock/SNV_InDel/SNVer/vcf
+mkdir ${batch_dir}/Lock/SNV_InDel/SNVer/maf
+mkdir ${batch_dir}/Lock/SNV_InDel/LoFreq
+mkdir ${batch_dir}/Lock/SNV_InDel/LoFreq/vcf
+mkdir ${batch_dir}/Lock/SNV_InDel/LoFreq/maf
 
 ####################################################################################################################
 # Lock for CNV:
-Lock_CNV_dir=${Lock_dir}/CNV
-mkdir ${Lock_CNV_dir}
-Lock_CNACS_dir=${Lock_CNV_dir}/CNACS
-mkdir ${Lock_CNACS_dir}
+mkdir ${batch_dir}/Lock/CNV
+mkdir ${batch_dir}/Lock/CNV/CNACS
+mkdir ${batch_dir}/Lock/CNV/CNVkit
 
 ####################################################################################################################
 # Lock for depth of coverage:
-Lock_DOC_dir=${Lock_dir}/DepthOfCoverage
-mkdir ${Lock_DOC_dir}
-mkdir ${Lock_DOC_dir}/FreqTable
-mkdir ${Lock_DOC_dir}/DensityPlot
+mkdir ${batch_dir}/Lock/DepthOfCoverage
+mkdir ${batch_dir}/Lock/DepthOfCoverage/FreqTable
+mkdir ${batch_dir}/Lock/DepthOfCoverage/DensityPlot
 
 ####################################################################################################################
 # Lock for ITD:
-Lock_ITD_dir=${Lock_dir}/ITD
-mkdir -p ${Lock_ITD_dir}/VarDict
-mkdir -p ${Lock_ITD_dir}/Pindel
-mkdir -p ${Lock_ITD_dir}/getITD
+mkdir ${batch_dir}/Lock/ITD
+mkdir ${batch_dir}/Lock/ITD/VarDict
+mkdir ${batch_dir}/Lock/ITD/Pindel
+mkdir ${batch_dir}/Lock/ITD/ScanITD
+mkdir ${batch_dir}/Lock/ITD/getITD
+mkdir ${batch_dir}/Lock/ITD/IGV
 
 ####################################################################################################################
 ####################################################################################################################
 # Define directories to save final results.
 ####################################################################################################################
-Result_dir=${batch_dir}/Result
-mkdir ${Result_dir}
+mkdir ${batch_dir}/Result
 
 ####################################################################################################################
 # Result for variant calling:
-Result_SNV_InDel_dir=${Result_dir}/SNV_InDel
-mkdir ${Result_SNV_InDel_dir}
-mkdir ${Result_SNV_InDel_dir}/AllVariants
-mkdir ${Result_SNV_InDel_dir}/AllVariants/Callers_Long
-mkdir ${Result_SNV_InDel_dir}/AllVariants/Callers_Wide
-mkdir ${Result_SNV_InDel_dir}/Filtered
-mkdir ${Result_SNV_InDel_dir}/Filtered/Long
-mkdir ${Result_SNV_InDel_dir}/Filtered/Medium
-mkdir ${Result_SNV_InDel_dir}/Filtered/Short
+mkdir ${batch_dir}/Result/SNV_InDel
+mkdir ${batch_dir}/Result/SNV_InDel/AllVariants
+mkdir ${batch_dir}/Result/SNV_InDel/AllVariants/Callers_Long
+mkdir ${batch_dir}/Result/SNV_InDel/AllVariants/Callers_Wide
+mkdir ${batch_dir}/Result/SNV_InDel/Filtered
+mkdir ${batch_dir}/Result/SNV_InDel/Filtered/Long
+mkdir ${batch_dir}/Result/SNV_InDel/Filtered/Medium
+mkdir ${batch_dir}/Result/SNV_InDel/Filtered/Short
 
-Result_CNV_dir=${Result_dir}/CNV
-mkdir ${Result_CNV_dir}
-Result_CNACS_dir=${Result_CNV_dir}/CNACS
-mkdir ${Result_CNACS_dir}
+# Result for ITD:
+mkdir ${batch_dir}/Result/ITD
+mkdir ${batch_dir}/Result/ITD/Table
+mkdir ${batch_dir}/Result/ITD/IGV
 
-Result_DOC_dir=${Result_dir}/DOC
-mkdir ${Result_DOC_dir}
-
-Result_ITD_dir=${Result_dir}/ITD
-mkdir ${Result_ITD_dir}
+####################################################################################################################
+####################################################################################################################
+# QC:
+####################################################################################################################
+mkdir ${batch_dir}/QC
+mkdir ${batch_dir}/QC/FASTQuick
+mkdir ${batch_dir}/QC/FASTQuick/Lock
+mkdir ${batch_dir}/QC/FASTQuick/Result
 
 ####################################################################################################################
 ####################################################################################################################
@@ -211,7 +188,7 @@ samples=($(echo ${fq_files[@]%_R*.fq.gz} | tr ' ' '\n' | sort -u | tr '\n' ' '))
 for sample in ${samples[@]}
 do
   qsub -o ${log_dir}/${sample}.log -e ${error_dir}/${sample}.error -N ${batch}_${sample}_Ensemble \
-    -v n_thread=${n_thread},target_chr=${target_chr},target_nochr=${target_nochr},target_nopad=${target_nopad},target_itd=${target_itd},batch=${batch},sample=${sample},fq_dir=${fq_dir},BAM_dir=${BAM_dir},BAM_lock_dir=${BAM_lock_dir},Lock_SNV_InDel_dir=${Lock_SNV_InDel_dir},Lock_VarDict_dir=${Lock_VarDict_dir},Lock_SNVer_dir=${Lock_SNVer_dir},Lock_LoFreq_dir=${Lock_LoFreq_dir},Result_SNV_InDel_dir=${Result_SNV_InDel_dir},Lock_CNACS_dir=${Lock_CNACS_dir},Lock_DOC_dir=${Lock_DOC_dir},Lock_ITD_dir=${Lock_ITD_dir},Result_ITD_dir=${Result_ITD_dir},temp_dir=${temp_dir} \
+    -v n_thread=${n_thread},target_name=${target_name},batch=${batch},sample=${sample},fq_dir=${fq_dir},batch_dir=${batch_dir},temp_dir=${temp_dir} \
     /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble_job.sh
 done
 

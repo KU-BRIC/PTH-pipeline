@@ -1,24 +1,17 @@
 ####################################################################################################################
 ####################################################################################################################
-# Submit jobs to identify ITDs for all samples in all batches.
+# Update referene files for filtering SNV_InDel.
 # Author: Haiying Kong
-# Last Modified: 2 June 2021
+# Last Modified: 27 June 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
 
-####################################################################################################################
-####################################################################################################################
-# Get batch names.
-batches=($(seq -f "%03g" 1 13))
-batches=("${batches[@]/#/Primary_}")
-
-# Submit jobs for all batches.
-for batch in ${batches[@]}
-do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/Ensemble/ITD.sh -d PTH -b $batch -t 8
-done
-
+filter_scheme_dir=/home/projects/cu_10184/projects/PTH/Code/Primary/FilteringScheme/ThreeSchemes
+Rscript ${filter_scheme_dir}/Get_Thresholds.R > ${filter_scheme_dir}/Get_Thresholds.Rout 2>&1
+Rscript ${filter_scheme_dir}/SNP_RegionSpecificTechnicalError.R "Long" > ${filter_scheme_dir}/SNP_RegionSpecificTechnicalError_Long.Rout 2>&1
+Rscript ${filter_scheme_dir}/SNP_RegionSpecificTechnicalError.R "Medium" > ${filter_scheme_dir}/SNP_RegionSpecificTechnicalError_Medium.Rout 2>&1
+Rscript ${filter_scheme_dir}/SNP_RegionSpecificTechnicalError.R "Short" > ${filter_scheme_dir}/SNP_RegionSpecificTechnicalError_Short.Rout 2>&1
 
 ####################################################################################################################
 ####################################################################################################################

@@ -1,0 +1,119 @@
+Analysis started on Fri Jun 11 10:44:58 2021
+
+Opening Input Files
+Opening BAM file /home/projects/cu_10184/projects/PTH/BatchWork/Primary_001/Lock/BAM/Horizon-CMP001.bam
+Reading header Records
+Opening VCF file /home/projects/cu_10184/projects/PTH/BatchWork/Primary_001/Lock/SNV_InDel/VarDict/vcf/Horizon-CMP001.vcf
+Skipping no-autosomal marker chrX:1190829
+Skipping no-autosomal marker chrX:1190869
+Skipping no-autosomal marker chrX:1190963
+Skipping no-autosomal marker chrX:1191074
+Skipping no-autosomal marker chrX:1191089
+Finished reading 5045 markers from VCF file
+Total of 4816 informative markers passed after AF >= 0.010000 and callRate >= 0.500000 threshold
+Reading BAM file /home/projects/cu_10184/projects/PTH/BatchWork/Primary_001/Lock/BAM/Horizon-CMP001.bam
+Finished extracting 95360 bases in 4816 markers from BAM file -- Avg Depth = 19.801
+Finished Reading BAM file /home/projects/cu_10184/projects/PTH/BatchWork/Primary_001/Lock/BAM/Horizon-CMP001.bam and VCF file /home/projects/cu_10184/projects/PTH/BatchWork/Primary_001/Lock/SNV_InDel/VarDict/vcf/Horizon-CMP001.vcf
+
+Performing chip-free estimation of sample mixture at fixed reference bias parameters (1.000000, 0.500000, 0.000000)
+double VerifyBamID::computeMixLLK( 0.000000 | 1.000000, 0.500000, 0.000000 ) = -41426.920497 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.050000 | 1.000000, 0.500000, 0.000000 ) = -36885.931185 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.100000 | 1.000000, 0.500000, 0.000000 ) = -35687.250440 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.150000 | 1.000000, 0.500000, 0.000000 ) = -35100.691402 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.200000 | 1.000000, 0.500000, 0.000000 ) = -34832.607041 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.250000 | 1.000000, 0.500000, 0.000000 ) = -34764.344560 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.300000 | 1.000000, 0.500000, 0.000000 ) = -34824.488881 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.350000 | 1.000000, 0.500000, 0.000000 ) = -34959.171242 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.400000 | 1.000000, 0.500000, 0.000000 ) = -35119.738316 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.450000 | 1.000000, 0.500000, 0.000000 ) = -35253.277549 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.230902 | 1.000000, 0.500000, 0.000000 ) = -34771.933061 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.269098 | 1.000000, 0.500000, 0.000000 ) = -34775.324948 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.248256 | 1.000000, 0.500000, 0.000000 ) = -34764.217324 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.247782 | 1.000000, 0.500000, 0.000000 ) = -34764.209803 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.247710 | 1.000000, 0.500000, 0.000000 ) = -34764.209678 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.247735 | 1.000000, 0.500000, 0.000000 ) = -34764.209691 for readGroup -1
+double VerifyBamID::computeMixLLK( 0.247686 | 1.000000, 0.500000, 0.000000 ) = -34764.209697 for readGroup -1
+Optimal per-sample fMix = 0.247710, LLK0 = 41426.920497, LLK1 = 34764.209678
+
+double VerifyBamID::computeMixLLK( 0.000000 | 1.000000, 0.500000, 0.000000 ) = -41426.920497 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.050000 | 1.000000, 0.500000, 0.000000 ) = -36885.931185 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.100000 | 1.000000, 0.500000, 0.000000 ) = -35687.250440 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.150000 | 1.000000, 0.500000, 0.000000 ) = -35100.691402 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.200000 | 1.000000, 0.500000, 0.000000 ) = -34832.607041 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.250000 | 1.000000, 0.500000, 0.000000 ) = -34764.344560 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.300000 | 1.000000, 0.500000, 0.000000 ) = -34824.488881 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.350000 | 1.000000, 0.500000, 0.000000 ) = -34959.171242 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.400000 | 1.000000, 0.500000, 0.000000 ) = -35119.738316 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.450000 | 1.000000, 0.500000, 0.000000 ) = -35253.277549 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.230902 | 1.000000, 0.500000, 0.000000 ) = -34771.933061 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.269098 | 1.000000, 0.500000, 0.000000 ) = -34775.324948 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.248256 | 1.000000, 0.500000, 0.000000 ) = -34764.217324 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.247782 | 1.000000, 0.500000, 0.000000 ) = -34764.209803 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.247710 | 1.000000, 0.500000, 0.000000 ) = -34764.209678 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.247735 | 1.000000, 0.500000, 0.000000 ) = -34764.209691 for readGroup 0
+double VerifyBamID::computeMixLLK( 0.247686 | 1.000000, 0.500000, 0.000000 ) = -34764.209697 for readGroup 0
+Optimal per-sample fMix = 0.247710, LLK0 = 41426.920497, LLK1 = 34764.209678
+
+calculating depth distribution
+finished calculating depth distribution
+Performing with-chip estimation of sample mixture at fixed reference bias parameter (1.000000, 0.500000, 0.000000)
+double VerifyBamID::computeIBDLLK( 1.000000 | 1.000000, 0.500000, 0.000000 ) = -47885.781782
+double VerifyBamID::computeIBDLLK( 0.950000 | 1.000000, 0.500000, 0.000000 ) = -45098.455008
+double VerifyBamID::computeIBDLLK( 0.900000 | 1.000000, 0.500000, 0.000000 ) = -43926.046869
+double VerifyBamID::computeIBDLLK( 0.850000 | 1.000000, 0.500000, 0.000000 ) = -42950.988473
+double VerifyBamID::computeIBDLLK( 0.800000 | 1.000000, 0.500000, 0.000000 ) = -42062.661045
+double VerifyBamID::computeIBDLLK( 0.750000 | 1.000000, 0.500000, 0.000000 ) = -41234.697038
+double VerifyBamID::computeIBDLLK( 0.700000 | 1.000000, 0.500000, 0.000000 ) = -40447.896286
+double VerifyBamID::computeIBDLLK( 0.650000 | 1.000000, 0.500000, 0.000000 ) = -39680.979911
+double VerifyBamID::computeIBDLLK( 0.600000 | 1.000000, 0.500000, 0.000000 ) = -38922.942550
+double VerifyBamID::computeIBDLLK( 0.550000 | 1.000000, 0.500000, 0.000000 ) = -38181.941040
+double VerifyBamID::computeIBDLLK( 0.500000 | 1.000000, 0.500000, 0.000000 ) = -37478.429275
+double VerifyBamID::computeIBDLLK( 0.450000 | 1.000000, 0.500000, 0.000000 ) = -36832.910232
+double VerifyBamID::computeIBDLLK( 0.400000 | 1.000000, 0.500000, 0.000000 ) = -36260.695676
+double VerifyBamID::computeIBDLLK( 0.350000 | 1.000000, 0.500000, 0.000000 ) = -35773.292603
+double VerifyBamID::computeIBDLLK( 0.300000 | 1.000000, 0.500000, 0.000000 ) = -35382.010315
+double VerifyBamID::computeIBDLLK( 0.250000 | 1.000000, 0.500000, 0.000000 ) = -35100.877043
+double VerifyBamID::computeIBDLLK( 0.200000 | 1.000000, 0.500000, 0.000000 ) = -34950.265289
+double VerifyBamID::computeIBDLLK( 0.150000 | 1.000000, 0.500000, 0.000000 ) = -34968.621058
+double VerifyBamID::computeIBDLLK( 0.100000 | 1.000000, 0.500000, 0.000000 ) = -35246.301706
+double VerifyBamID::computeIBDLLK( 0.050000 | 1.000000, 0.500000, 0.000000 ) = -36067.767143
+double VerifyBamID::computeIBDLLK( 0.180902 | 1.000000, 0.500000, 0.000000 ) = -34934.153963
+double VerifyBamID::computeIBDLLK( 0.169098 | 1.000000, 0.500000, 0.000000 ) = -34937.744515
+double VerifyBamID::computeIBDLLK( 0.179095 | 1.000000, 0.500000, 0.000000 ) = -34933.997449
+double VerifyBamID::computeIBDLLK( 0.178890 | 1.000000, 0.500000, 0.000000 ) = -34933.995405
+double VerifyBamID::computeIBDLLK( 0.178861 | 1.000000, 0.500000, 0.000000 ) = -34933.995375
+double VerifyBamID::computeIBDLLK( 0.178844 | 1.000000, 0.500000, 0.000000 ) = -34933.995388
+Comparing with individual Horizon-CMP001.. Optimal fIBD = 0.178861, LLK0 = 47885.781782, LLK1 = 34933.995375 for readgroup -1
+Best Matching Individual is Horizon-CMP001 with IBD = 0.178861
+Self Individual is Horizon-CMP001 with IBD = 0.821139
+double VerifyBamID::computeIBDLLK( 1.000000 | 1.000000, 0.500000, 0.000000 ) = -47885.781782
+double VerifyBamID::computeIBDLLK( 0.950000 | 1.000000, 0.500000, 0.000000 ) = -45098.455008
+double VerifyBamID::computeIBDLLK( 0.900000 | 1.000000, 0.500000, 0.000000 ) = -43926.046869
+double VerifyBamID::computeIBDLLK( 0.850000 | 1.000000, 0.500000, 0.000000 ) = -42950.988473
+double VerifyBamID::computeIBDLLK( 0.800000 | 1.000000, 0.500000, 0.000000 ) = -42062.661045
+double VerifyBamID::computeIBDLLK( 0.750000 | 1.000000, 0.500000, 0.000000 ) = -41234.697038
+double VerifyBamID::computeIBDLLK( 0.700000 | 1.000000, 0.500000, 0.000000 ) = -40447.896286
+double VerifyBamID::computeIBDLLK( 0.650000 | 1.000000, 0.500000, 0.000000 ) = -39680.979911
+double VerifyBamID::computeIBDLLK( 0.600000 | 1.000000, 0.500000, 0.000000 ) = -38922.942550
+double VerifyBamID::computeIBDLLK( 0.550000 | 1.000000, 0.500000, 0.000000 ) = -38181.941040
+double VerifyBamID::computeIBDLLK( 0.500000 | 1.000000, 0.500000, 0.000000 ) = -37478.429275
+double VerifyBamID::computeIBDLLK( 0.450000 | 1.000000, 0.500000, 0.000000 ) = -36832.910232
+double VerifyBamID::computeIBDLLK( 0.400000 | 1.000000, 0.500000, 0.000000 ) = -36260.695676
+double VerifyBamID::computeIBDLLK( 0.350000 | 1.000000, 0.500000, 0.000000 ) = -35773.292603
+double VerifyBamID::computeIBDLLK( 0.300000 | 1.000000, 0.500000, 0.000000 ) = -35382.010315
+double VerifyBamID::computeIBDLLK( 0.250000 | 1.000000, 0.500000, 0.000000 ) = -35100.877043
+double VerifyBamID::computeIBDLLK( 0.200000 | 1.000000, 0.500000, 0.000000 ) = -34950.265289
+double VerifyBamID::computeIBDLLK( 0.150000 | 1.000000, 0.500000, 0.000000 ) = -34968.621058
+double VerifyBamID::computeIBDLLK( 0.100000 | 1.000000, 0.500000, 0.000000 ) = -35246.301706
+double VerifyBamID::computeIBDLLK( 0.050000 | 1.000000, 0.500000, 0.000000 ) = -36067.767143
+double VerifyBamID::computeIBDLLK( 0.180902 | 1.000000, 0.500000, 0.000000 ) = -34934.153963
+double VerifyBamID::computeIBDLLK( 0.169098 | 1.000000, 0.500000, 0.000000 ) = -34937.744515
+double VerifyBamID::computeIBDLLK( 0.179095 | 1.000000, 0.500000, 0.000000 ) = -34933.997449
+double VerifyBamID::computeIBDLLK( 0.178890 | 1.000000, 0.500000, 0.000000 ) = -34933.995405
+double VerifyBamID::computeIBDLLK( 0.178861 | 1.000000, 0.500000, 0.000000 ) = -34933.995375
+double VerifyBamID::computeIBDLLK( 0.178844 | 1.000000, 0.500000, 0.000000 ) = -34933.995388
+Comparing with individual Horizon-CMP001.. Optimal fIBD = 0.178861, LLK0 = 47885.781782, LLK1 = 34933.995375 for readgroup 0
+Best Matching Individual is Horizon-CMP001 with IBD = 0.178861
+Self Individual is Horizon-CMP001 with IBD = 0.821139
+Analysis finished on Fri Jun 11 10:45:37 2021
+

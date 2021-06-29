@@ -1,8 +1,8 @@
 ####################################################################################################################
 ####################################################################################################################
-# Identify ITDs with Pindel and getITD, combine filter results with help from VarDict.
+# Pre-process, call variants, annotate and filter variants.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 3 June 2021
+# Last Modified: 23 March 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -10,62 +10,44 @@
 ####################################################################################################################
 ####################################################################################################################
 # Get batch name and number of thread from argument passing.
-while getopts ":d:b:p:t:" opt
-do
-  case $opt in
-    d) dir_name="$OPTARG";;
-    b) batch="$OPTARG";;
-    p) panel="$OPTARG";;
-    t) n_thread="$OPTARG";;
-    \?) echo "Invalid option -$OPTARG" >&2;;
-  esac
-done
+dir_name=PTH_test
+batch=ToyBatch
+panel=panel2
+n_thread=8
 
 ####################################################################################################################
 ####################################################################################################################
 # Check if argument inputs from command are correct.
-if [ -z "${dir_name}" ]
-then 
-  echo "Error: Directory name is empty"
-  exit 1
-fi
-
-if [ -z "$batch" ]
-then 
-  echo "Error: Batch name is empty"
-  exit 1
-fi
-
 if [ -z "$panel" ]
-then 
+then
   # find target file for this batch from BatchInfo.txt with batch name.
   target_name=$(more /home/projects/cu_10184/projects/${dir_name}/Meta/BatchInfo.txt | awk -F '\t' -v batch="$batch" '( $1==batch ) {print $3}')
   if [ "${target_name}" = "" ]
-  then 
+  then
     echo "Error: BatchInfo.txt does not have any information for this batch."
     exit 1
   fi
-  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
+  target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
+  target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
+  target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
 elif [ "$panel" = "panel1" ]
-then 
+then
   # Find target file for panel version 1.
   target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38
-  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
+  target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
+  target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
+  target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
 elif [ "$panel" = "panel2" ]
-then 
+then
   # Find target file for panel version 1.
   target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38_190919225222_updated-to-v2
-  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
+  target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
+  target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
+  target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
 else
   echo "Error: Please input panel version from command line as panel1 or panel2, or update BatchInfo.txt"
   exit 1
 fi
-
-if [ -z "${n_thread}" ]
-then
-  echo "By default, each job will use 8 cores."
-  n_thread=8
-fi 
 
 ####################################################################################################################
 ####################################################################################################################
@@ -79,19 +61,6 @@ cd ${temp_dir}
 
 ####################################################################################################################
 ####################################################################################################################
-# Define directories to save log files and error files.
-# log directory:
-log_dir=${batch_dir}/log/ITD
-rm -rf ${log_dir}
-mkdir ${log_dir}
-
-# error directory:
-error_dir=${batch_dir}/error/ITD
-rm -rf ${error_dir}
-mkdir ${error_dir}
-
-####################################################################################################################
-####################################################################################################################
 # Define directories to save intermediate results.
 ####################################################################################################################
 Lock_dir=${batch_dir}/Lock
@@ -101,40 +70,15 @@ Lock_dir=${batch_dir}/Lock
 BAM_dir=${Lock_dir}/BAM
 
 ####################################################################################################################
-# Lock for VarDict:
-Lock_VarDict_dir=${Lock_dir}/SNV_InDel/VarDict
-
-####################################################################################################################
-# Lock for ITD:
-Lock_ITD_dir=${Lock_dir}/ITD
-# mv ${Lock_ITD_dir} ${Lock_ITD_dir}_trash 2>/dev/null
-# rm -rf ${Lock_ITD_dir}_trash 2>/dev/null &
-if [ -d "${Lock_ITD_dir}" ]
-then
-  mv ${Lock_ITD_dir} /home/projects/cu_10184/projects/${dir_name}/temp/${batch}
-fi
-mkdir -p ${Lock_ITD_dir}/VarDict
-mkdir -p ${Lock_ITD_dir}/Pindel
-mkdir -p ${Lock_ITD_dir}/ScanITD
-mkdir -p ${Lock_ITD_dir}/getITD
-mkdir -p ${Lock_ITD_dir}/IGV
+# Lock for CNV:
+Lock_CNV_dir=${Lock_dir}/CNV
+Lock_CNACS_dir=${Lock_CNV_dir}/CNACS
 
 ####################################################################################################################
 ####################################################################################################################
-# Define directories to save final results.
-####################################################################################################################
-Result_dir=${batch_dir}/Result
-
-Result_ITD_dir=${Result_dir}/ITD
-rm -rf ${Result_ITD_dir}
-mkdir -p ${Result_ITD_dir}/Table
-mkdir -p ${Result_ITD_dir}/IGV
-
-####################################################################################################################
-####################################################################################################################
-# Get BAM file names.
-cd ${BAM_dir}
-bam_files=($(ls *.bam))
+# Get fastq file names.
+cd ${fq_dir}
+fq_files=($(ls *.fq.gz))
 
 ####################################################################################################################
 # Change to working directory.
@@ -142,17 +86,40 @@ cd ${temp_dir}
 
 ####################################################################################################################
 # Get sample names.
-samples=($(echo ${bam_files[@]%.bam} | tr ' ' '\n' | sort -u | tr '\n' ' '))
+samples=($(echo ${fq_files[@]%_R*.fq.gz} | tr ' ' '\n' | sort -u | tr '\n' ' '))
+sample=${samples[0]}
 
-####################################################################################################################
-# Run pipeline on all samples in this batch.
-####################################################################################################################
-for sample in ${samples[@]}
-do
-  qsub -o ${log_dir}/${sample}.log -e ${error_dir}/${sample}.error -N ${batch}_${sample}_ITD \
-    -v n_thread=${n_thread},target_itd=${target_itd},batch=${batch},sample=${sample},BAM_dir=${BAM_dir},Lock_VarDict_dir=${Lock_VarDict_dir},Lock_ITD_dir=${Lock_ITD_dir},Result_ITD_dir=${Result_ITD_dir},temp_dir=${temp_dir} \
-    /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/Ensemble/ITD_job.sh
-done
+source /home/projects/cu_10184/projects/PTH/Software/envsetup
+conda deactivate
+
+hg="/home/projects/cu_10184/people/haikon/Reference/GATK/hg38_MaskedU2AF1L5/Homo_sapiens_assembly38_MaskedU2AF1L5.fasta"
+Funcotator_DB="/home/projects/cu_10184/people/haikon/Reference/Funcotator/funcotator_dataSources.v1.7.20200521s"
+
+conda activate CNACS
+
+export JAVAPATH=/home/projects/cu_10184/people/haikon/Software/anaconda3/bin
+export PICARD_PATH=/home/projects/cu_10184/people/haikon/Software/picard.jar
+export SAMTOOLS_PATH=/home/projects/cu_10184/people/haikon/Software/samtools-1.12/bin
+export PERL_PATH=/usr/bin/perl
+export BEDTOOLS_PATH=/home/projects/cu_10184/people/haikon/Software/anaconda3/bin
+export R_PATH=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/R
+export R_LIBS_PATH=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/library
+export R_LIBS=/home/projects/cu_10184/people/haikon/Software/R-4.0.4/library
+
+rm -rf ${Lock_CNACS_dir}/${sample}
+mkdir -p ${Lock_CNACS_dir}/${sample}
+
+toil_cnacs run \
+    ${Lock_CNACS_dir}/${sample}/jobstore/ \
+    --stats \
+    --db_dir /home/projects/cu_10184/projects/PTH/Reference/CNACS/db \
+    --outdir ${Lock_CNACS_dir} \
+    --pool_dir /home/projects/cu_10184/projects/PTH/Reference/CNACS/PoN \
+    --fasta $hg \
+    --samp ${BAM_dir}/${sample}.bam
+
+conda deactivate
+
 
 ####################################################################################################################
 ####################################################################################################################

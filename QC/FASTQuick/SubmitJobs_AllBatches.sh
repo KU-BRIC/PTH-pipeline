@@ -1,8 +1,8 @@
 ####################################################################################################################
 ####################################################################################################################
-# Submit jobs to identify ITDs for all samples in all batches.
+# Pre-process, call variants, and filter.
 # Author: Haiying Kong
-# Last Modified: 2 June 2021
+# Last Modified: 7 June 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -16,7 +16,7 @@ batches=("${batches[@]/#/Primary_}")
 # Submit jobs for all batches.
 for batch in ${batches[@]}
 do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/Ensemble/ITD.sh -d PTH -b $batch -t 8
+  sh /home/projects/cu_10184/projects/PTH/Code/QC/FASTQuick/FASTQuick.sh -d PTH -b $batch -t 8
 done
 
 

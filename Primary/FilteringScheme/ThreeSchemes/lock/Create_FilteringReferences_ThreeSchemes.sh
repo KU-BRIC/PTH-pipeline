@@ -1,24 +1,17 @@
 ####################################################################################################################
 ####################################################################################################################
-# Submit jobs to identify ITDs for all samples in all batches.
+# Update referene files for filtering with all data.
 # Author: Haiying Kong
-# Last Modified: 2 June 2021
+# Last Modified: 27 June 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
 
-####################################################################################################################
-####################################################################################################################
-# Get batch names.
-batches=($(seq -f "%03g" 1 13))
-batches=("${batches[@]/#/Primary_}")
-
-# Submit jobs for all batches.
-for batch in ${batches[@]}
-do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/Ensemble/ITD.sh -d PTH -b $batch -t 8
-done
-
+filter_scheme_dir=/home/projects/cu_10184/projects/PTH/Code/Primary/FilteringScheme
+R CMD BATCH ${filter_scheme_dir}/ThreeSchemes/Get_thresh_HighDP.R
+R CMD BATCH ${filter_scheme_dir}/ThreeSchemes/Long_SNP_RegionSpecificTechnicalError.R
+R CMD BATCH ${filter_scheme_dir}/ThreeSchemes/Medium_SNP_RegionSpecificTechnicalError.R
+R CMD BATCH ${filter_scheme_dir}/ThreeSchemes/Short_SNP_RegionSpecificTechnicalError.R
 
 ####################################################################################################################
 ####################################################################################################################

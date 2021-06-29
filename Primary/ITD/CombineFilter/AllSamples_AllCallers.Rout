@@ -1,0 +1,65 @@
+
+R version 4.0.4 (2021-02-15) -- "Lost Library Book"
+Copyright (C) 2021 The R Foundation for Statistical Computing
+Platform: x86_64-pc-linux-gnu (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+  Natural language support but running in an English locale
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> ####################################################################################################################
+> ####################################################################################################################
+> # Get ITDs from all samples.
+> # Author: Haiying Kong
+> # Last Modified: 8 June 2021
+> ####################################################################################################################
+> ####################################################################################################################
+> setwd('/home/projects/cu_10184/projects/PTH')
+> options(stringsAsFactors=FALSE)
+> rm(list=ls())
+> 
+> library(stringr)
+> library(xlsx)
+Picked up _JAVA_OPTIONS: -Djava.io.tmpdir=
+> 
+> ####################################################################################################################
+> ####################################################################################################################
+> # Get batch names.
+> batch.nums = str_pad(1:13, 3, pad='0')
+> batches = paste0('Primary_', batch.nums)
+> 
+> # Pickup ITDs from all samples.
+> apple = c()
+> for (batch in batches[1:10])  {
++   dir.name = paste0('BatchWork/', batch, '/Result/ITD/Table/')
++   file.names = dir(dir.name, pattern='.txt')
++ 
++   for (file.name in file.names)  {
++     aster = read.table(paste0(dir.name, file.name), header=TRUE, sep='\t')
++     if (nrow(aster) > 0)  {
++       apple = rbind(apple, aster)
++       }
++     }
++   }
+> 
+> # Save the results.
+> write.table(apple, 'AllBatches/ITD/AllSamples_AllCallers.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
+> write.xlsx(apple, 'AllBatches/ITD/AllSamples_AllCallers.xlsx', sheetName='Pindel',
++            row.names=FALSE, col.names=TRUE, append=FALSE)
+> 
+> ####################################################################################################################
+> ####################################################################################################################
+> 
+> proc.time()
+   user  system elapsed 
+  1.937   0.285   1.596 
