@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 28 June 2021
+# Last Modified: 29 June 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -293,7 +293,7 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/DOC/HelloRanges_one_sam
 ####################################################################################################################
 # VarDict:
 ################################################
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${scheme}/VarDict_FilterClean.R ${batch} ${sample} ${batch_dir}/Lock/SNV_InDel/VarDict ${batch_dir}/Lock/ITD/VarDict
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/VarDict_FilterClean.R ${batch} ${sample} ${batch_dir}/Lock/SNV_InDel/VarDict ${batch_dir}/Lock/ITD/VarDict
 
 ####################################################################################################################
 # Pindel:
@@ -309,7 +309,7 @@ pindel2vcf -p ${batch_dir}/Lock/ITD/Pindel/${sample}_TD -r $hg -R HG38 -d 202012
 conda deactivate
 
 # Clean the output vcf.
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${scheme}/Pindel_Clean.R ${batch} ${sample} ${batch_dir}/Lock/ITD/Pindel
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/Pindel_Clean.R ${batch} ${sample} ${batch_dir}/Lock/ITD/Pindel
 
 ####################################################################################################################
 # ScanITD:
@@ -328,7 +328,7 @@ conda deactivate
 #  -n MISMATCH           maximum allowed mismatch bases of pairwise local alignment (default: 3)
 
 # Clean the output tsv.
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${scheme}/ScanITD_Clean.R ${batch} ${sample} ${batch_dir}/Lock/ITD/ScanITD
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/ScanITD_Clean.R ${batch} ${sample} ${batch_dir}/Lock/ITD/ScanITD
 
 ####################################################################################################################
 # getITD:
@@ -353,7 +353,7 @@ mv ${sample}_getitd/* ./
 rm -r ${sample}_getitd
 
 # Clean the output tsv.
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${scheme}/getITD_Clean.R ${batch} ${sample} ${batch_dir}/Lock/ITD/getITD
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/getITD_Clean.R ${batch} ${sample} ${batch_dir}/Lock/ITD/getITD
 
 ####################################################################################################################
 # Plot zoom out IGV for whole FLT3 region.

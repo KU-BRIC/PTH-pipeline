@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Identify ITDs with Pindel and getITD, combine filter results with help from VarDict.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 29 June 2021
+# Last Modified: 3 June 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -45,14 +45,17 @@ then
     echo "Error: BatchInfo.txt does not have any information for this batch."
     exit 1
   fi
+  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
 elif [ "$panel" = "panel1" ]
 then 
   # Find target file for panel version 1.
   target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38
+  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
 elif [ "$panel" = "panel2" ]
 then 
   # Find target file for panel version 1.
   target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38_190919225222_updated-to-v2
+  target_itd=/home/projects/cu_10184/projects/PTH/Reference/ITD/FLT3_1/${target_name}.bed
 else
   echo "Error: Please input panel version from command line as panel1 or panel2, or update BatchInfo.txt"
   exit 1
@@ -94,16 +97,27 @@ mkdir ${error_dir}
 Lock_dir=${batch_dir}/Lock
 
 ####################################################################################################################
+# Lock for BAM:
+BAM_dir=${Lock_dir}/BAM
+
+####################################################################################################################
+# Lock for VarDict:
+Lock_VarDict_dir=${Lock_dir}/SNV_InDel/VarDict
+
+####################################################################################################################
 # Lock for ITD:
-if [ -d "${Lock_dir}/ITD" ]
+Lock_ITD_dir=${Lock_dir}/ITD
+# mv ${Lock_ITD_dir} ${Lock_ITD_dir}_trash 2>/dev/null
+# rm -rf ${Lock_ITD_dir}_trash 2>/dev/null &
+if [ -d "${Lock_ITD_dir}" ]
 then
-  mv ${Lock_dir}/ITD /home/projects/cu_10184/projects/${dir_name}/temp/${batch}
+  mv ${Lock_ITD_dir} /home/projects/cu_10184/projects/${dir_name}/temp/${batch}
 fi
-mkdir -p ${Lock_dir}/ITD/VarDict
-mkdir -p ${Lock_dir}/ITD/Pindel
-mkdir -p ${Lock_dir}/ITD/ScanITD
-mkdir -p ${Lock_dir}/ITD/getITD
-mkdir -p ${Lock_dir}/ITD/IGV
+mkdir -p ${Lock_ITD_dir}/VarDict
+mkdir -p ${Lock_ITD_dir}/Pindel
+mkdir -p ${Lock_ITD_dir}/ScanITD
+mkdir -p ${Lock_ITD_dir}/getITD
+mkdir -p ${Lock_ITD_dir}/IGV
 
 ####################################################################################################################
 ####################################################################################################################
@@ -111,14 +125,15 @@ mkdir -p ${Lock_dir}/ITD/IGV
 ####################################################################################################################
 Result_dir=${batch_dir}/Result
 
-rm -rf ${Result_dir}/ITD
-mkdir -p ${Result_dir}/ITD/Table
-mkdir -p ${Result_dir}/ITD/IGV
+Result_ITD_dir=${Result_dir}/ITD
+rm -rf ${Result_ITD_dir}
+mkdir -p ${Result_ITD_dir}/Table
+mkdir -p ${Result_ITD_dir}/IGV
 
 ####################################################################################################################
 ####################################################################################################################
 # Get BAM file names.
-cd ${Lock_dir}/BAM
+cd ${BAM_dir}
 bam_files=($(ls *.bam))
 
 ####################################################################################################################
@@ -135,7 +150,7 @@ samples=($(echo ${bam_files[@]%.bam} | tr ' ' '\n' | sort -u | tr '\n' ' '))
 for sample in ${samples[@]}
 do
   qsub -o ${log_dir}/${sample}.log -e ${error_dir}/${sample}.error -N ${batch}_${sample}_ITD \
-    -v n_thread=${n_thread},target_name=${target_name},batch=${batch},sample=${sample},batch_dir=${batch_dir},temp_dir=${temp_dir} \
+    -v n_thread=${n_thread},target_itd=${target_itd},batch=${batch},sample=${sample},BAM_dir=${BAM_dir},Lock_VarDict_dir=${Lock_VarDict_dir},Lock_ITD_dir=${Lock_ITD_dir},Result_ITD_dir=${Result_ITD_dir},temp_dir=${temp_dir} \
     /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/Ensemble/ITD_job.sh
 done
 
