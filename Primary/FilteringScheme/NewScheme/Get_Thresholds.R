@@ -2,36 +2,38 @@
 ####################################################################################################################
 # Get threshold for the filtering scheme.
 # Author: Haiying Kong
-# Last Modified: 27 June 2021
+# Last Modified: 3 July 2021
 ####################################################################################################################
 ####################################################################################################################
-setwd('/home/projects/cu_10184/projects/PTH/')
+setwd('/home/projects/cu_10184/projects')
 options(stringsAsFactors=FALSE)
 rm(list=ls())
 
 ####################################################################################################################
 # Get argument values from command line.
 args = commandArgs(trailingOnly=TRUE)
-scheme_name = args[1]
-thresh_dp_low = as.numeric(args[2])
-thresh_dp_high = as.numeric(args[3])
-thresh_n_alt = as.numeric(args[4])
-thresh_maf_db = as.numeric(args[5])
-thresh_maf_norm = as.numeric(args[6])
-thresh_silhouette = as.numeric(args[7])
-thresh_lower_cluster_center = as.numeric(args[8])
+
+scheme_dir = args[1]
+scheme_name = args[2]
+thresh_dp_low = as.numeric(args[3])
+thresh_dp_high = as.numeric(args[4])
+thresh_n_alt = as.numeric(args[5])
+thresh_maf_db = as.numeric(args[6])
+thresh_maf_norm = as.numeric(args[7])
+thresh_silhouette = as.numeric(args[8])
+thresh_lower_cluster_center = as.numeric(args[9])
 
 ####################################################################################################################
 ####################################################################################################################
 # Define directory to save results.
-ref.dir = paste0('/home/projects/cu_10184/projects/PTH/Reference/Filtering/', scheme_name)
+ref.dir = paste0('/home/projects/cu_10184/projects/', scheme_dir, '/Reference/Filtering/', scheme_name)
 if (dir.exists(ref.dir))   unlink(ref.dir, recursive=TRUE)
-dir.create(ref.dir)
+dir.create(ref.dir, recursive=TRUE)
 
 ####################################################################################################################
 ####################################################################################################################
 # Get batch names.
-batch.dir = '/home/projects/cu_10184/projects/PTH/BatchWork/'
+batch.dir = '/home/projects/cu_10184/projects/', scheme_dir, '/BatchWork/'
 batches = dir(batch.dir, pattern='^Primary_')
 
 # Collect all DPs from all samples.

@@ -2,10 +2,10 @@
 ####################################################################################################################
 # Identify potential SNPs identified from PoN and region specific technical errors.
 # Author: Haiying Kong
-# Last Modified: 27 June 2021
+# Last Modified: 3 July 2021
 ####################################################################################################################
 ####################################################################################################################
-setwd('/home/projects/cu_10145/people/haikon/Project/PTH')
+setwd('/home/projects/cu_10145/people/haikon/Project')
 options(stringsAsFactors=FALSE)
 rm(list=ls())
 
@@ -16,11 +16,12 @@ library(reshape2)
 ####################################################################################################################
 # Get argument values from command line.
 args = commandArgs(trailingOnly=TRUE)
-scheme_name = args[1]
+scheme_dir = args[1]
+scheme_name = args[2]
 
 ####################################################################################################################
 # Define directory to save results.
-ref.dir = paste0('/home/projects/cu_10184/projects/PTH/Reference/Filtering/', scheme_name)
+ref.dir = paste0('/home/projects/cu_10184/projects/', scheme_dir, '/Reference/Filtering/', scheme_name)
 
 # Read in thresholds.
 thresh = read.table(paste0(ref.dir, '/Thresholds.txt'), header=TRUE, sep='\t')
@@ -37,7 +38,7 @@ normals = sort(unique(sapply(normals, function(x) strsplit(x,'-')[[1]][1])))
 ####################################################################################################################
 ####################################################################################################################
 # Get batch names.
-batch.dir = '/home/projects/cu_10184/projects/PTH/BatchWork/'
+batch.dir = '/home/projects/cu_10184/projects/', scheme_dir, '/BatchWork/'
 batches = dir(batch.dir, pattern='^Primary_')
 
 ####################################################################################################################
