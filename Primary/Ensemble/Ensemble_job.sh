@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 29 June 2021
+# Last Modified: 7 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -21,9 +21,9 @@ hg="/home/projects/cu_10184/people/haikon/Reference/GATK/hg38_MaskedU2AF1L5/Homo
 Funcotator_DB="/home/projects/cu_10184/people/haikon/Reference/Funcotator/funcotator_dataSources.v1.7.20200521s"
 
 # Panel target:
-target_nochr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
-target_chr=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
-target_nopad=/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
+target_nochr=/home/projects/cu_10184/projects/${dir_name}/PanelSeqData/Bait_Target/Target/Padded/${target_name}.bed
+target_chr=/home/projects/cu_10184/projects/${dir_name}/PanelSeqData/Bait_Target/Target/Chr_Padded/${target_name}.bed
+target_nopad=/home/projects/cu_10184/projects/${dir_name}/PanelSeqData/Bait_Target/Target/Chr_Original/${target_name}.bed
 
 # CNVkit PoN:
 cnvkit_pon="/home/projects/cu_10184/projects/PTH/Reference/CNVkit/OutputReference.cnn"
