@@ -41,6 +41,7 @@ All work is saved under the folder:
 The bait and target files of the panels are saved under:
 
     /home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target
+
 The sequence files are saved by batch:
 
     /home/projects/cu_10184/projects/PTH/PanelSeqData/[batch_name]/fastq
@@ -178,7 +179,7 @@ In order to perform filtering with a new scheme with a new set of thresholds for
     -p: The threshold for population allele frequency obtained from public databases to decide polymorphism. (default: 0.01)
     -n: The threshold for population allele frequency estimated from our normal samples to decide polymorphism. (default: 0.05)
     -s: The threshold for silhouette score to decide if the two clusters can be considered as clearly separated when we decide region specific technical errors. (default: 0.8)
-    -c: The threshold for the center of the lower cluster to decide if the lower cluster is technical error when we decide region specific technical errors. (default: 0.08)
+    -c: The threshold for the cente/home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Targetr of the lower cluster to decide if the lower cluster is technical error when we decide region specific technical errors. (default: 0.08)
 
 The reference files for the new filtering scheme are saved under:
 
@@ -255,4 +256,33 @@ To rerun Somalier:
     sh /home/projects/cu_10184/projects/PTH/Code/QC/Somalier/Somalier.sh -d [project_name] -b [batch_name]
     -d: The project name, for example, PTH.
     -b: The batch name, for example, Primary_001
+
+#### To run pipeline with a new panel.
+(1) Save target files as bed files under the designated directories.
+   The target file before padding, with chromosomes denoted as: chr1, chr2, ..., chr22, chrX, chrY:
+    
+    /home/projects/cu_10184/projects/[project_name]/PanelSeqData/Bait_Target/Chr_Original
+
+   The target file with regions padded, with chromosomes denoted as: chr1, chr2, ..., chr22, chrX, chrY:
+    
+    /home/projects/cu_10184/projects/[project_name]/PanelSeqData/Bait_Target/Chr_Padded
+   
+   The target file with regions padded, with chromosomes denoted as: 1, 2, ..., 22, X, Y:
+    
+    /home/projects/cu_10184/projects/[project_name]/PanelSeqData/Bait_Target/Padded
+
+(2) Create or update Meta file
+
+    /home/projects/cu_10184/projects/[project_name]/Meta/BatchInfo.txt
+    
+   The file should be tab deliminated file in the format:
+   
+    Batch_ID          Bait    Target
+    [name_of_batch]   [na]    [target_file_name_without_path_without_.bed]
+    
+   Bait file is not called by pipeline, and therefore can be fill with any string for the cell.
+   
+(3) Run the pipeline without passing any values to the argument -p. For instance,
+
+    sh /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble.sh -d PTH -b [batch_name] -t 8
 ## 
