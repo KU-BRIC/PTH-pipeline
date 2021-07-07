@@ -179,7 +179,7 @@ Quality evaluation on the sequence data:
 
 #### Pipeline for filtering of SNV-InDel.
 
-Filtering is performed to exclude technical errors and variants that are least likely pathogenically effective, such as polymorphisms or variants in intergenic regions. The process includes the following steps:
+Filtering is performed to exclude technical errors and variants that are least likely pathogenically effective, such as polymorphisms or variants in intergenic regions. The process includes the following steps ("too high" or "too low" is subject to a choice of threshold):
 
 (1) Technical errors: exclude variants identified with too low AF, or too low or too high DP.
 
