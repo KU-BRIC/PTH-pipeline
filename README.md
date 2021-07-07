@@ -110,19 +110,23 @@ Output from VarDict:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/SNV_InDel/VarDict/vcf
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/SNV_InDel/VarDict/maf
+
 Output from SNVer:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/SNV_InDel/SNVer/vcf
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/SNV_InDel/SNVer/maf
+
 Output from LoFreq:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/SNV_InDel/LoFreq/vcf
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/SNV_InDel/LoFreq/maf
+
 Combined outputs from VarDict, SNVer, and LoFreq:
 (Long format table has one row with one variant called by any of three callers, and can have multiple rows for the same variant if it is called by multiple callers. Wide format table reshaped Long format table, and if a variant is called by multiple callers, it takes only one row and additional information from more callers are saved in additional columns.)
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Results/SNV_InDel/AllVariants/CalledVariants_Long
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Results/SNV_InDel/AllVariants/CalledVariants_Wide
+
 Filtered variant list:
 (The combined variant list is filtered with three filtering schemes to include only potential pathogenic variants.)
 
@@ -134,6 +138,7 @@ CNV:
 Output from CNVkit:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/CNV/CNVkit
+
 Output from CNACS:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/CNV/CNACS
@@ -142,24 +147,31 @@ ITD:
 Output from VarDict:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/ITD/VarDict
+
 Output from Pindel:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/ITD/Pindel
+
 Output from ScanITD:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/ITD/ScanITD
+
 Output from getITD:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/ITD/getITD
+
 IGV on FLT3 gene:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/ITD/IGV
+
 Combined outputs from VarDict, Pindel, ScanITD, getITD:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Result/ITD/Table
+
 Zoom in IGV in the region of ITD:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Result/ITD/IGV
+
 QC:
 Quality evaluation on the sequence data:
 
@@ -259,6 +271,7 @@ To rerun Somalier:
 
 #### To run pipeline with a new panel.
 (1) Save target files as bed files under the designated directories.
+
    The target file before padding, with chromosomes denoted as: chr1, chr2, ..., chr22, chrX, chrY:
     
     /home/projects/cu_10184/projects/[project_name]/PanelSeqData/Bait_Target/Chr_Original
@@ -271,7 +284,7 @@ To rerun Somalier:
     
     /home/projects/cu_10184/projects/[project_name]/PanelSeqData/Bait_Target/Padded
 
-(2) Create or update Meta file
+(2) Create or update Meta file.
 
     /home/projects/cu_10184/projects/[project_name]/Meta/BatchInfo.txt
     
