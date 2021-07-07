@@ -43,7 +43,7 @@ then
   target_name=$(more /home/projects/cu_10184/projects/${dir_name}/Meta/BatchInfo.txt | awk -F '\t' -v batch="$batch" '( $1==batch ) {print $3}')
   if [ "${target_name}" = "" ]
   then
-    echo "Error: BatchInfo.txt does not have any information for this batch."
+    echo "Error: sh /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble.sh -d PTH -b [batch_name] -p [panel_name] -t 8BatchInfo.txt does not have any information for this batch."
     exit 1
   fi
 elif [ "$panel" = "panel1" ]
@@ -188,7 +188,7 @@ samples=($(echo ${fq_files[@]%_R*.fq.gz} | tr ' ' '\n' | sort -u | tr '\n' ' '))
 for sample in ${samples[@]}
 do
   qsub -o ${log_dir}/${sample}.log -e ${error_dir}/${sample}.error -N ${batch}_${sample}_Ensemble \
-    -v n_thread=${n_thread},target_name=${target_name},batch=${batch},sample=${sample},fq_dir=${fq_dir},batch_dir=${batch_dir},temp_dir=${temp_dir} \
+    -v n_thread=${n_thread},target_name=${target_name},dir_name=${dir_name},batch=${batch},sample=${sample},fq_dir=${fq_dir},batch_dir=${batch_dir},temp_dir=${temp_dir} \
     /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble_job.sh
 done
 
