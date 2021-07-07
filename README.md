@@ -14,19 +14,19 @@ The pipeline applies existing tools on the sequence data, and works on Linux env
 
 Pre-processing of the raw sequence data applies BWA, Picard, and GATK tools to align reads on the reference genome, sort the reads, mark duplicates, and recalibrate base quality scores.
 
-### SNV and short InDel.
+#### SNV and short InDel.
 
 SNVs and short InDels are decided as a union of variants called by VarDict, SNVer, LoFreq, and are annotated with Funcotator. SNV-InDels are filtered to exclude germline variants and variants with low pathogenic impacts.
 
-### CNV.
+#### CNV.
 
 CNACS and CNVkit generate two sets of CNV list, each tool excludes possible germline CNVs with panel of normals created from normal samples.
 
-### ITD.
+#### ITD.
 
 VarDict, Pindel, ScanITD, and getITD are applied on the reads from the targeted regions on FLT3 gene.
 
-### QC.
+#### QC.
 
 FASTQuick gives summary statistics and illustrations for sequence quality evaluations.
 
@@ -36,7 +36,7 @@ All work is saved under the folder:
 
     /home/projects/cu_10184/projects/PTH
 
-### Sequence data (fastq).
+#### Sequence data (fastq).
 
 The bait and target files of the panels are saved under:
 
@@ -45,26 +45,26 @@ The sequence files are saved by batch:
 
     /home/projects/cu_10184/projects/PTH/PanelSeqData/[batch_name]/fastq
 
-### Meta data.
+#### Meta data.
 
 Panel information for batches, and patient and tissue information for samples are saved under:
 
     /home/projects/cu_10184/projects/PTH/Meta
     BatchInfo.txt  SampleInfo.txt
 
-### Reference files.
+#### Reference files.
 
 Reference files that are more specific to our study and our data, such as known variants identified from clinical study (REDCap and Horizon), filtering schemes decided by our data, panel of normals computed from our normal samples, annotation for specific regions on FLT3 gene for ITD identification, are saved under:
 
     /home/projects/cu_10184/projects/PTH/Reference
 
-### Pipeline scripts.
+#### Pipeline scripts.
 
 Pipeline scripts are saved under the folder:
 
     /home/projects/cu_10184/projects/PTH/Code
 
-### Files from running by a batch.
+#### Files from running by a batch.
 
 All files generated from running the pipeline on a batch are saved under:
 
@@ -84,7 +84,7 @@ Quality control files are under:
 ## Commands and outputs.
 
 
-### Full pipeline.
+#### Full pipeline.
 
 To run the full pipeline:
 
@@ -164,7 +164,7 @@ Quality evaluation on the sequence data:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/QC/FASTQuick
 
-### Pipeline for filtering of SNV-InDel.
+#### Pipeline for filtering of SNV-InDel.
 
 The main pipeline performs filtering of SNV-InDel to identify potential pathogenic variants with three fixed schemes - Long, Medium, Short.
 In order to perform filtering with a new scheme with a new set of thresholds for filtering, please first create a new set of reference files for the new filtering scheme by running:
@@ -200,7 +200,7 @@ To perform filtering for multiple batches:
 
     sh /home/projects/cu_10184/projects/PTH/Code/Primary/SNV_InDel/Filter_NewScheme/Submit_Jobs_AllBatches_Filter.sh
 
-### CNV.
+#### CNV.
 
 To rerun only CNVkit:
 
@@ -218,7 +218,7 @@ To rerun only CNACS:
     -d: The project name, for example, PTH.
     -b: The batch name, for example, Primary_001
 
-### ITD.
+#### ITD.
 
 To rerun only ITD identification:
 
@@ -229,7 +229,7 @@ To rerun only ITD identification:
     /home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target
     -t: The number of cores used by each job.
     
-### QC.
+#### QC.
 
 To run FASTQuick:
 
