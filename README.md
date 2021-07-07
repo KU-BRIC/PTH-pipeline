@@ -10,7 +10,7 @@ The pipeline is developed with aims to conveniently and efficiently pre-process 
 
 The pipeline applies existing tools on the sequence data, and works on Linux environments with cluster computer facilities.
 
-####620110 Pre-processing.
+#### Pre-processing.
 
 Pre-processing of the raw sequence data applies BWA, Picard, and GATK tools to align reads on the reference genome, sort the reads, mark duplicates, and recalibrate base quality scores.
 
