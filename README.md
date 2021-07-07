@@ -180,7 +180,9 @@ Quality evaluation on the sequence data:
 #### Pipeline for filtering of SNV-InDel.
 
 Filtering is performed to exclude technical errors and variants that are least likely pathogenically effective, such as polymorphisms or variants in intergenic regions. The process includes the following steps:
+
 (1) Technical errors: exclude variants identified with too low AF, or too low or too high DP.
+
 (2) Variants classes of our interest for their high likelihood as being pathogenic: include only variants classified as the following type by Funcotator annotator.
 
     DE_NOVO_START_IN_FRAME, DE_NOVO_START_OUT_FRAME, Frame_Shift_Del, Frame_Shift_Ins,
@@ -188,6 +190,7 @@ Filtering is performed to exclude technical errors and variants that are least l
     Splice_Site, START_CODON_SNP, Translation_Start_Site
 
 (3) Polymorphisms: polymorphisms are decided by 
+
 (i) variants with high population AF according to public data bases:
 
     dbSNP, ExAC, ESP, ClinVar, 1000G
