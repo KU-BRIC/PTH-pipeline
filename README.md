@@ -179,7 +179,34 @@ Quality evaluation on the sequence data:
 
 #### Pipeline for filtering of SNV-InDel.
 
+Filtering is performed to exclude technical errors and variants that are least likely pathogenically effective, such as polymorphisms or variants in intergenic regions. The process includes the following steps:
+(1) Technical errors: exclude variants identified with too low AF, or too low or too high DP.
+(2) Variants classes of our interest for their high likelihood as being pathogenic: include only variants classified as the following type by Funcotator annotator.
+
+    DE_NOVO_START_IN_FRAME, DE_NOVO_START_OUT_FRAME, Frame_Shift_Del, Frame_Shift_Ins,
+    In_Frame_Del, In_Frame_Ins, Missense_Mutation, Nonsense_Mutation, Nonstop_Mutation,
+    Splice_Site, START_CODON_SNP, Translation_Start_Site
+
+(3) Polymorphisms: polymorphisms are decided by 
+(i) variants with high population AF according to public data bases:
+
+    dbSNP, ExAC, ESP, ClinVar, 1000G
+    
+(ii) variants with high population AF that is estimated by our normal samples.
+
+(4) Pathogenic variants identified from previous studies: variants that are listed in the following databases as pathogenic are included in the final results and this overules the step (3).
+
+    ClinVar, CIViC
+
+(5) Region specific technical errors: if at a genetic location, more than 5 samples carry a variant, and AFs from samples form distictive 2 clusters, and the center of the lower cluster is too small, then the variants in the lower cluster are considered as technical error in a genomic region that is prone to have technical errors.
+
 The main pipeline performs filtering of SNV-InDel to identify potential pathogenic variants with three fixed schemes - Long, Medium, Short.
+The thresholds for the three schemes are saved as:
+
+    /home/projects/cu_10184/projects/PTH/Reference/Filtering/Long/Thresholds.txt
+    /home/projects/cu_10184/projects/PTH/Reference/Filtering/Medium/Thresholds.txt
+    /home/projects/cu_10184/projects/PTH/Reference/Filtering/Short/Thresholds.txt
+
 In order to perform filtering with a new scheme with a new set of thresholds for filtering, please first create a new set of reference files for the new filtering scheme by running:
 
     sh /home/projects/cu_10184/projects/PTH/Code/Primary/FilteringScheme/NewScheme/Create_FilteringReferences_NewScheme.sh -r [filtering_scheme_directory] -f [filtering_scheme_name] -l [thresh_dp_low] -h [thresh_dp_high] -a [thresh_n_alt]  [thresh_maf_db] [thresh_maf_norm]  [thresh_silhouette]  [thresh_lower_cluster_center]
