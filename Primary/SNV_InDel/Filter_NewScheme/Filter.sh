@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Filter SNV-InDels with filtering schemes.
 # Author: Haiying Kong
-# Last Modified: 27 June 2021
+# Last Modified: 3 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -15,6 +15,7 @@ do
   case $opt in
     d) dir_name="$OPTARG";;
     b) batch="$OPTARG";;
+    r) scheme_dir="$OPTARG";;
     f) scheme_name="$OPTARG";;
     \?) echo "Invalid option -$OPTARG" >&2;;
   esac
@@ -40,7 +41,7 @@ then
   scheme_name=NewScheme
   echo "By default, NewScheme is chosen as filtering scheme."
 else
-  if [ ! -d "/home/projects/cu_10184/projects/PTH/Reference/Filtering/${scheme_name}" ]
+  if [ ! -d "/home/projects/cu_10184/projects/${scheme_dir}/Reference/Filtering/${scheme_name}" ]
   then
     echo "The reference files for the filtering scheme do not exist."
     exit 1

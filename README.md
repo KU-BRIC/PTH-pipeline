@@ -105,6 +105,7 @@ The outputs:
 BAM files from alignment:
     
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock/BAM
+
 SNV_InDel:
 Output from VarDict:
 
@@ -209,6 +210,8 @@ The thresholds for the three schemes are saved as:
     /home/projects/cu_10184/projects/PTH/Reference/Filtering/Long/Thresholds.txt
     /home/projects/cu_10184/projects/PTH/Reference/Filtering/Medium/Thresholds.txt
     /home/projects/cu_10184/projects/PTH/Reference/Filtering/Short/Thresholds.txt
+
+(i) For identification of polymorphisms from our normal samples, the threshold for the number of normal people who carry a given variant to decide the variant is polymorphism is decided by 2 different algorithms. The 'Long' scheme decides the threshold under the philoso
 
 In order to perform filtering with a new scheme with a new set of thresholds for filtering, please first create a new set of reference files for the new filtering scheme by running:
 

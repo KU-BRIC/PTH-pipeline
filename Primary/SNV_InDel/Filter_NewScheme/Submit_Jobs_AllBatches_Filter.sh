@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Filter SNV-InDels.
 # Author: Haiying Kong
-# Last Modified: 27 June 2021
+# Last Modified: 3 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -16,7 +16,7 @@ batches=("${batches[@]/#/Primary_}")
 # Submit jobs for all batches.
 for batch in ${batches[@]}
 do
-  sh /home/projects/cu_10184/projects/PTH/Code/Primary/SNV_InDel/Filter_NewScheme/Filter.sh -d PTH -b $batch -f NewScheme
+  sh /home/projects/cu_10184/projects/PTH/Code/Primary/SNV_InDel/Filter_NewScheme/Filter.sh -d PTH -b $batch -r PTH -f NewScheme
 done
 
 ####################################################################################################################

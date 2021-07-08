@@ -79,10 +79,21 @@ idx.1000g = grep('by1000genomes', var$dbSNP_Val_Status)
 idx.clinvar.ex = unique(c(grep('Benign', var$ClinVar_VCF_CLNSIG), grep('Likely_benign', var$ClinVar_VCF_CLNSIG)))
 
 # COSMIC:
-idx.cosmic.ex = which(var$COSMIC_tissue_types_affected=='')
+if (scheme_name=='Short')  {
+  idx.cosmic.ex = which(var$COSMIC_overlapping_mutations=='')
+  }  else  {
+  idx.cosmic.ex = which(var$COSMIC_tissue_types_affected=='')
+  }
 
-# idx.exclude = unique(c(idx.dbsnp.common, idx.dbsnp.g5, idx.dbsnp.cfl, idx.exac, idx.esp, idx.tgp, idx.1000g, idx.clinvar.ex, idx.cosmic.ex))
-idx.exclude = unique(c(idx.dbsnp, idx.maf, idx.clinvar.ex, idx.cosmic.ex))
+###################################
+# Polymorphisms identified from our normal samples.
+flag.var = paste(var$Hugo_Symbol, var$Chromosome, var$Start_Position, var$End_Position, var$Reference_Allele, var$Tumor_Seq_Allele2, sep='_')
+flag.pon = apply(pon, 1, function(x) paste(x, collapse='_'))
+idx.pon = which(flag.var %in% flag.pon)
+
+###################################
+# Find index list for exclusion.
+idx.exclude = unique(c(idx.dbsnp, idx.maf, idx.clinvar.ex, idx.cosmic.ex, idx.pon))
 
 ####################################################################################################################
 # Identify variants for inclusion with highest priority.
@@ -110,17 +121,6 @@ idx = idx.exclude[!(idx.exclude %in% idx.include)]
 
 # Update variant list.
 var = var[-idx, ]
-
-####################################################################################################################
-# Filter out polymorphysm with our normal samples.
-flag.var = paste(var$Hugo_Symbol, var$Chromosome, var$Start_Position, var$End_Position, var$Reference_Allele, var$Tumor_Seq_Allele2, sep='_')
-flag.pon = apply(pon, 1, function(x) paste(x, collapse='_'))
-idx = which(flag.var %in% flag.pon)
-
-if (length(idx) > 0)  {
-  var = var[-idx, ]
-  flag.var = flag.var[-idx]
-  }
 
 ####################################################################################################################
 # Filter out region specific technical errors.
