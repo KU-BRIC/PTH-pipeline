@@ -211,11 +211,13 @@ The thresholds for the three schemes are saved as:
     /home/projects/cu_10184/projects/PTH/Reference/Filtering/Medium/Thresholds.txt
     /home/projects/cu_10184/projects/PTH/Reference/Filtering/Short/Thresholds.txt
 
-(i) For identification of polymorphisms from our normal samples, the threshold for the number of normal people who carry a given variant to decide the variant is polymorphism is decided by 2 different algorithms. The 'Long' scheme decides the threshold under the philoso
+(i) For identification of polymorphisms from our normal samples, the threshold for the number of normal people who carry a given variant to decide the variant is polymorphism is decided by two different algorithms. For a given variant, the parameter estimate for population AF has point estimate and 95% confidence interval estimate. The 'Long' scheme decides the threshold under the philosophy that "Even the worst case can meet the criteria", and make the lower bound of 95% confidence interval of the parameter estimate greater than the threshold passed by the argument "-n [thresh_maf_norm]". The 'Medium' and 'Short' schemes decide the threshold under the philosophy that "The case with the highest probability can meet the criteria", and make the point estimate of population AF which has the highest probability greater than the threshold passed by the argument "-n [thresh_maf_norm]".
 
-In order to perform filtering with a new scheme with a new set of thresholds for filtering, please first create a new set of reference files for the new filtering scheme by running:
+(ii) For the list for exclusion candidate, the 'Long' and 'Medium' schemes exclude variants that do not have any information on the column "COSMIC_tissue_types_affected" from Funcotator annotation, while the 'Short' scheme excludes variants that do not have any information on the column "COSMIC_overlapping_mutations" from Funcotator annotation.
 
-    sh /home/projects/cu_10184/projects/PTH/Code/Primary/FilteringScheme/NewScheme/Create_FilteringReferences_NewScheme.sh -r [filtering_scheme_directory] -f [filtering_scheme_name] -l [thresh_dp_low] -h [thresh_dp_high] -a [thresh_n_alt]  [thresh_maf_db] [thresh_maf_norm]  [thresh_silhouette]  [thresh_lower_cluster_center]
+In order to perform filtering with a new scheme that is modified from the 'Medium' scheme with a new set of thresholds, please first create a new set of reference files for the new filtering scheme by running:
+
+    sh /home/projects/cu_10184/projects/PTH/Code/Primary/FilteringScheme/NewScheme/Create_FilteringReferences_NewScheme.sh -r [filtering_scheme_directory] -f [filtering_scheme_name] -l [thresh_dp_low] -h [thresh_dp_high] -t [thresh_n_alt] -p [thresh_maf_db] -n [thresh_maf_norm]  -s [thresh_silhouette] -c  [thresh_lower_cluster_center]
     -r: The name of the directory of filtering scheme. (default: PTH)
     -f: The name of the new filtering scheme. The reference files for the filtering scheme will be saved under a folder with the filtering scheme name as folder name. (default: NewScheme)
     -l: The threshold for DP to decide variants as technical error due to low DP. (default: 200)
