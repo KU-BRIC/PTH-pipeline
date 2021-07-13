@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Update referene files for filtering SNV_InDel.
 # Author: Haiying Kong
-# Last Modified: 3 July 2021
+# Last Modified: 13 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -84,7 +84,7 @@ fi
 ####################################################################################################################
 # Create files for the filtering scheme
 filter_scheme_dir=/home/projects/cu_10184/projects/PTH/Code/Primary/FilteringScheme/${scheme_name}
-Rscript ${filter_scheme_dir}/Get_Thresholds.R ${scheme_dir} ${scheme_name} ${thresh_dp_low} ${thresh_dp_high} ${thresh_n_alt} ${thresh_maf_db} ${thresh_maf_norm} ${thresh_silhouette} ${thresh_lower_cluster_center} > ${filter_scheme_dir}/Get_thresholds.Rout 2>&1
+Rscript ${filter_scheme_dir}/Get_Thresholds.R ${scheme_dir} ${scheme_name} ${thresh_dp_low} ${thresh_dp_high} ${thresh_n_alt} ${thresh_maf_db} ${thresh_maf_norm} ${thresh_silhouette} ${thresh_lower_cluster_center} > ${filter_scheme_dir}/Get_Thresholds.Rout 2>&1
 Rscript ${filter_scheme_dir}/SNP_RegionSpecificTechnicalError.R ${scheme_dir} ${scheme_name} > ${filter_scheme_dir}/SNP_RegionSpecificTechnicalError.Rout 2>&1
 
 ####################################################################################################################

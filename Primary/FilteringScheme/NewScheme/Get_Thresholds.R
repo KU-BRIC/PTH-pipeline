@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Get threshold for the filtering scheme.
 # Author: Haiying Kong
-# Last Modified: 3 July 2021
+# Last Modified: 13 July 2021
 ####################################################################################################################
 ####################################################################################################################
 setwd('/home/projects/cu_10184/projects')
@@ -33,7 +33,7 @@ dir.create(ref.dir, recursive=TRUE)
 ####################################################################################################################
 ####################################################################################################################
 # Get batch names.
-batch.dir = '/home/projects/cu_10184/projects/', scheme_dir, '/BatchWork/'
+batch.dir = paste0('/home/projects/cu_10184/projects/', scheme_dir, '/BatchWork/')
 batches = dir(batch.dir, pattern='^Primary_')
 
 # Collect all DPs from all samples.

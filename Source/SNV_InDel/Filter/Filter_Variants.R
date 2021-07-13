@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Filter variants - NewScheme.
 # Author: Haiying Kong
-# Last Modified: 8 July 2021
+# Last Modified: 13 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
@@ -16,7 +16,8 @@ library(xlsx)
 args = commandArgs(trailingOnly=TRUE)
 res.dir = args[1]
 sam = args[2]
-scheme_name = args[3]
+scheme_dir = args[3]
+scheme_name = args[4]
 
 ####################################################################################################################
 # Set values.
@@ -27,7 +28,7 @@ var.classes = c('DE_NOVO_START_IN_FRAME', 'DE_NOVO_START_OUT_FRAME', 'Frame_Shif
 ####################################################################################################################
 ####################################################################################################################
 # Read in data for the filtering scheme.
-ref.dir = paste0('/home/projects/cu_10184/projects/PTH/Reference/Filtering/', scheme_name)
+ref.dir = paste0('/home/projects/cu_10184/projects/', scheme_dir, '/Reference/Filtering/', scheme_name)
 thresh = read.table(paste0(ref.dir, '/Thresholds.txt'), header=TRUE, sep='\t')
 pon = read.table(paste0(ref.dir, '/SNPs_PoN.txt'), header=TRUE, sep='\t')
 error = read.table(paste0(ref.dir, '/RegionSpecificTechnicalError.txt'), header=TRUE, sep='\t')

@@ -2,10 +2,10 @@
 ####################################################################################################################
 # Identify potential SNPs identified from PoN and region specific technical errors.
 # Author: Haiying Kong
-# Last Modified: 3 July 2021
+# Last Modified: 13 July 2021
 ####################################################################################################################
 ####################################################################################################################
-setwd('/home/projects/cu_10145/people/haikon/Project')
+setwd('/home/projects/cu_10145/people/haikon/Project/PTH')
 options(stringsAsFactors=FALSE)
 rm(list=ls())
 
@@ -38,7 +38,7 @@ normals = sort(unique(sapply(normals, function(x) strsplit(x,'-')[[1]][1])))
 ####################################################################################################################
 ####################################################################################################################
 # Get batch names.
-batch.dir = '/home/projects/cu_10184/projects/', scheme_dir, '/BatchWork/'
+batch.dir = paste0('/home/projects/cu_10184/projects/', scheme_dir, '/BatchWork/')
 batches = dir(batch.dir, pattern='^Primary_')
 
 ####################################################################################################################
