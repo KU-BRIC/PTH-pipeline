@@ -281,7 +281,7 @@ To rerun only ITD identification:
 
 To run FASTQuick:
 
-    sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/QC/FASTQuick.sh -d [project_name] -b [batch_name] -p [panel_name] -t 8
+    sh /home/projects/cu_10184/projects/PTH/Code/Primary/QC/FASTQuick.sh -d [project_name] -b [batch_name] -p [panel_name] -t 8
     -d: The project name, for example, PTH.
     -b: The batch name, for example, Primary_001
     -p: The name of the panel that is used for the batch. If the input is empty, it will try to find bait and target information from:
@@ -290,7 +290,7 @@ To run FASTQuick:
 
 Or to run FASTQuick for multiple batches:
 
-    sh /home/projects/cu_10184/projects/PTH/Code/Primary/ITD/QC/SubmitJobs_AllBatches.sh
+    sh /home/projects/cu_10184/projects/PTH/Code/Primary/QC/SubmitJobs_AllBatches.sh
 
 To rerun verifyBamID:
 

@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 7 July 2021
+# Last Modified: 14 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -125,9 +125,9 @@ mv ${batch_dir}/Lock/BAM/${sample}_recal_data.table ${batch_dir}/Lock/BAM/lock/
 # VarDict:
 ################################################
 # Set parameters.
-allel_freq=0.01
+allel_freq=0.005
 map_qual=20
-phred=22.5
+phred=20
 var_pos=5
 Qratio=1.5
 indel_size=50
@@ -139,7 +139,7 @@ nmfreq=0.1
 mfreq=0.25
 
 # Run VarDict:
-vardict -G $hg -N ${sample} -b ${batch_dir}/Lock/BAM/${sample}.bam $target_nochr -c 1 -S 2 -E 3 -t  \
+vardict -G $hg -N ${sample} -b ${batch_dir}/Lock/BAM/${sample}.bam ${target_nochr} -c 1 -S 2 -E 3 -t  \
   -f ${allel_freq} -O ${map_qual} -q ${phred} -P ${var_pos} -o ${Qratio} -I ${indel_size}  \
   -M ${min_match} -L ${min_SV} -w ${ins_size} -W ${ins_SD} --nmfreq ${nmfreq} --mfreq ${mfreq}  \
   | teststrandbias.R \
@@ -161,7 +161,7 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_Fu
 num_hap=2
 het=0.001
 map_qual=20
-base_qual=17
+base_qual=20
 str_bias=0.0001
 fish_thresh=0.0001
 p_thresh=0.05
@@ -192,9 +192,9 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_Fu
 # LoFreq:
 ################################################
 # Set parameters.
-min_bq=6
-min_alt_bq=6
-min_mq=0
+min_bq=20
+min_alt_bq=20
+min_mq=20
 sig=0.01
 min_cov=1
 
