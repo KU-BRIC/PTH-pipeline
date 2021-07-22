@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Filter SNV-InDels with filtering schemes - job.
 # Author: Haiying Kong
-# Last Modified: 27 June 2021
+# Last Modified: 22 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -29,13 +29,13 @@ cd ${temp_dir}
 # Filter.
 ####################################################################################################################
 # Long:
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${Result_dir} ${sample} "Long"
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${Result_dir} ${sample} "PTH" "Long"
 
 # Medium:
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${Result_dir} ${sample} "Medium"
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${Result_dir} ${sample} "PTH" "Medium"
 
 # Short:
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${Result_dir} ${sample} "Short"
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${Result_dir} ${sample} "PTH" "Short"
 
 ####################################################################################################################
 ####################################################################################################################

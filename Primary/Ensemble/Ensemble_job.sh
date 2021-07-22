@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 14 July 2021
+# Last Modified: 22 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -222,13 +222,13 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Combine_Varia
 # Filter.
 ####################################################################################################################
 # Long:
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${batch_dir}/Result/SNV_InDel ${sample} "Long"
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${batch_dir}/Result/SNV_InDel ${sample} "PTH" "Long"
 
 # Medium:
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${batch_dir}/Result/SNV_InDel ${sample} "Medium"
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${batch_dir}/Result/SNV_InDel ${sample} "PTH" "Medium"
 
 # Short:
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${batch_dir}/Result/SNV_InDel ${sample} "Short"
+Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${batch_dir}/Result/SNV_InDel ${sample} "PTH" "Short"
 
 ####################################################################################################################
 ####################################################################################################################
