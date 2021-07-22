@@ -40,24 +40,24 @@ All work is saved under the folder:
 
 The bait and target files of the panels are saved under:
 
-    /home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target
+    /home/projects/cu_10184/projects/[project_name]/PanelSeqData/Bait_Target
 
 The sequence files are saved by batch:
 
-    /home/projects/cu_10184/projects/PTH/PanelSeqData/[batch_name]/fastq
+    /home/projects/cu_10184/projects/[project_name]/PanelSeqData/[batch_name]/fastq
 
 #### Meta data.
 
 Panel information for batches, and patient and tissue information for samples are saved under:
 
-    /home/projects/cu_10184/projects/PTH/Meta
+    /home/projects/cu_10184/projects/[project_name]/Meta
     BatchInfo.txt  SampleInfo.txt
 
 #### Reference files.
 
 Reference files that are more specific to our study and our data, such as known variants identified from clinical study (REDCap and Horizon), filtering schemes decided by our data, panel of normals computed from our normal samples, annotation for specific regions on FLT3 gene for ITD identification, are saved under:
 
-    /home/projects/cu_10184/projects/PTH/Reference
+    /home/projects/cu_10184/projects/[project_name]/Reference
 
 #### Pipeline scripts.
 
@@ -70,14 +70,17 @@ Pipeline scripts are saved under the folder:
 All files generated from running the pipeline on a batch are saved under:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]
+
 Log files and error files are under:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/log
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/error
+
 Some intermediate files and final result files are under:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Result
+
 Quality control files are under:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/QC
@@ -89,12 +92,11 @@ Quality control files are under:
 
 To run the full pipeline:
 
-    sh /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble.sh -d PTH -b [batch_name] -p [panel_name] -t 8
-    -d: The name of a project that is located at:
-    /home/projects/cu_10184/projects/[project_name]
+    sh /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble.sh -d [project_name] -b [batch_name] -p [panel_name] -t 8
+    -d: The project name, for example, PTH. /home/projects/cu_10184/projects/[project_name]
     -b: The name of the batch.
     -p: The name of the panel that is used for the batch. If the input is empty, it will try to find bait and target information from:
-    /home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target
+        /home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target
     -t: The number of cores used by each job.
 
 To run the full pipeline for multiple batches:
@@ -178,8 +180,27 @@ Quality evaluation on the sequence data:
 
     /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/QC/FASTQuick
 
-#### Pipeline for filtering of SNV-InDel.
+#### SNV-InDel.
+##### Call, annotation and filtering.
+To call SNV_InDels with VarDict, SNVer, and LoFreq, annotate with Funcotator, and filter the variants:
 
+    sh /home/projects/cu_10184/projects/PTH/Code/Primary/SNV_InDel/Call_Anno_Filter/Call_Anno_Filter.sh -d [project_name] -b [batch_name] -p [panel_name] -t 8
+    -d: The project name, for example, PTH. /home/projects/cu_10184/projects/[project_name]
+    -b: The name of the batch.
+    -p: The name of the panel that is used for the batch. If the input is empty, it will try to find bait and target information from:
+        /home/projects/cu_10184/projects/[project_name]/PanelSeqData/Bait_Target
+    -t: The number of cores used by each job.
+    
+To call SNV_InDels with LoFreq and annotate with Funcotator.
+
+    sh /home/projects/cu_10184/projects/PTH/Code/Primary/SNV_InDel/LoFreq/LoFreq.sh -d [project_name] -b [batch_name] -p [panel_name] -t 8
+    -d: The project name, for example, PTH. /home/projects/cu_10184/projects/[project_name]
+    -b: The name of the batch.
+    -p: The name of the panel that is used for the batch. If the input is empty, it will try to find bait and target information from:
+        /home/projects/cu_10184/projects/[project_name]/PanelSeqData/Bait_Target
+    -t: The number of cores used by each job.
+
+##### Filtering.
 Filtering is performed to exclude technical errors and variants that are least likely pathogenically effective, such as polymorphisms or variants in intergenic regions. The process includes the following steps ("too high" or "too low" is subject to a choice of threshold):
 
 (1) Technical errors: exclude variants identified with too low AF, or too low or too high DP.
