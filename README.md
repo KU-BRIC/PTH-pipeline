@@ -236,6 +236,14 @@ The thresholds for the three schemes are saved as:
 
 (ii) For the list for exclusion candidate, the 'Long' and 'Medium' schemes exclude variants that do not have any information on the column "COSMIC_tissue_types_affected" from Funcotator annotation, while the 'Short' scheme excludes variants that do not have any information on the column "COSMIC_overlapping_mutations" from Funcotator annotation.
 
+###### Three filtering schemes.
+
+In order to perform filtering with three schemes that are installed in the pipeline, please run:
+
+    sh /home/projects/cu_10184/projects/PTH/Code/Primary/SNV_InDel/Filter_ThreeSchemes/Filter.sh -d [project_name] -b [batch_name]
+
+###### New filtering scheme.
+
 In order to perform filtering with a new scheme that is modified from the 'Medium' scheme with a new set of thresholds, please first create a new set of reference files for the new filtering scheme by running:
 
     sh /home/projects/cu_10184/projects/PTH/Code/Primary/FilteringScheme/NewScheme/Create_FilteringReferences_NewScheme.sh -r [filtering_scheme_directory] -f [filtering_scheme_name] -l [thresh_dp_low] -h [thresh_dp_high] -t [thresh_n_alt] -p [thresh_maf_db] -n [thresh_maf_norm]  -s [thresh_silhouette] -c  [thresh_lower_cluster_center]
