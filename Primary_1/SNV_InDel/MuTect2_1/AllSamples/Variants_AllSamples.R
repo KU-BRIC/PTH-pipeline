@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Get list of variants from all samples.
 # Author: Haiying Kong
-# Last Modified: 22 July 2021
+# Last Modified: 23 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
@@ -20,7 +20,7 @@ library(xlsx)
 batches = paste0('Primary_', str_pad(1:13, 3, pad='0'))
 
 # Read in the names of columns that will be kept.
-maf.cols = read.table('/home/projects/cu_10184/projects/PTH/Reference/MAF_Columns/MAF_Cols_full_1.txt', header=FALSE, sep='\t')[ ,1]
+maf.cols = read.table('/home/projects/cu_10184/projects/PTH/Reference/MAF_Columns/MAF_Cols_1.txt', header=FALSE, sep='\t')[ ,1]
 
 ####################################################################################################################
 ####################################################################################################################

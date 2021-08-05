@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Run MuTect2 on tumor samples, and annotate variants - job.
 # Author: Haiying Kong
-# Last Modified: 22 July 2021
+# Last Modified: 23 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -48,7 +48,7 @@ gatk Funcotator \
   --disable-sequence-dictionary-validation
 
 # Fill missing DP and AF in Funcotator maf output.
-Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/MuTect2_1/Somatic/Fill_DP_AF_FuncotatorMAF.R ${batch_dir}/Lock/SNV_InDel/MuTect2_1 ${sam}
+Rscript /home/projects/cu_10184/projects/PTH/Code/Primary_1/SNV_InDel/MuTect2_1/Somatic/MAF_Fill_DP_AF_Fix_IDH2.R ${batch_dir}/Lock/SNV_InDel/MuTect2_1/maf ${sam}
 
 ####################################################################################################################
 ####################################################################################################################

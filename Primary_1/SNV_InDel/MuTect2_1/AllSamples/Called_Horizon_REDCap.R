@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Get list of Horizon and REDCap variants called by our pipeline.
 # Author: Haiying Kong
-# Last Modified: 22 July 2021
+# Last Modified: 24 July 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
@@ -14,22 +14,30 @@ rm(list=ls())
 library(stringr)
 library(xlsx)
 
+# Set parameters.
+filter.schemes = c('VariantClass', 'TechError', 'DB_Long', 'DB_Short')
 
-data.name = 'FilteredVariants_VariantClass'
+for (filter.scheme in filter.schemes)  {
 
 ####################################################################################################################
 ####################################################################################################################
 # Read in variant list for all samples.
 ####################################################################################################################
-aster = read.table(paste0('AllBatches_1/Result/SNV_InDel/MuTect2_1/', data.name, '.txt'), header=TRUE, quote='', sep='\t')
-aster.tag = paste(aster$PTH_ID, aster$Hugo_Symbol, aster$Chromosome, aster$Start_Position, aster$Reference_Allele, aster$Tumor_Seq_Allele2, sep='_')
+aster = read.table(paste0('AllBatches_1/Result/SNV_InDel/MuTect2_1/FilteredVariants_', filter.scheme, '.txt'), header=TRUE, quote='', sep='\t')
+j = match(c('Chromosome', 'Start_Position', 'End_Position', 'Reference_Allele', 'Tumor_Seq_Allele2'), names(aster))
+names(aster)[j] = c('Chrom', 'Start', 'End', 'Ref', 'Alt')
+aster$Tag = ''
+
+####################################################################################################################
+# Column names for apple.
+maf.cols = c('Batch', 'PTH_ID', 'Sample', 'Hugo_Symbol', 'Chrom', 'Start', 'Ref', 'Alt', 'Refseq_mRNA_Id', 'cDNA_Change', 'Protein_Change', 'AF', 'DP')
 
 ####################################################################################################################
 ####################################################################################################################
 # Read in Horizon and REDCap variants.
 ####################################################################################################################
 # Horizon:
-horizon = read.table('Reference/Horizon/HorizonMyeloid.txt', header=TRUE, sep='\t')[ ,c(1:7,12)]
+horizon = read.table('Reference/Horizon/HorizonMyeloid_brief.txt', header=TRUE, sep='\t')[ ,c(1:7,12)]
 horizon = cbind(rep('Horizon', nrow(horizon)), horizon)
 idx = which(horizon$OnPanel=='yes')
 names(horizon)[c(1,8,9)] = c('PTH_ID', 'ProteinChange', 'Note')
@@ -46,9 +54,6 @@ idx = which(redcap$SNP==1)
 redcap$Note[idx] = paste(redcap$Note[idx], 'SNP', sep='_')
 redcap = redcap[ ,-(11:12)]
 
-# Append Horizon and REDCap.
-flags = unique(rbind(horizon[ ,1:3], redcap[ ,1:3]))
-
 ####################################################################################################################
 ####################################################################################################################
 # Collect all variants that match PTH_ID, Hugo_Symbol and Chrom with Horizon or REDCap.
@@ -56,13 +61,16 @@ flags = unique(rbind(horizon[ ,1:3], redcap[ ,1:3]))
 ####################################################################################################################
 # Tag with Horizon variants.
 ####################################################################################################################
-idx = match(horizon.tag, aster.tag)
-na.idx = which(is.na(idx))
+aster.tag = paste(aster$PTH_ID, aster$Hugo_Symbol, aster$Chrom, aster$Start, aster$Ref, aster$Alt, sep='_')
 
-apple = aster[idx[-na.idx], ]
-apple$AF_Clinic = horizon$AF[-na.idx]
-apple$Note = horizon$Note[-na.idx]
+idx = which(aster.tag %in% horizon.tag)
 
+aster$Tag[idx] = 'Horizon'
+
+apple = aster[idx, maf.cols]
+idx.ref = match(aster.tag[idx], horizon.tag)
+apple$AF_Clinic = horizon$AF[idx.ref]
+apple$Note = horizon$Note[idx.ref]
 
 ####################################################################################################################
 # Tag with REDCap variants.
@@ -70,42 +78,39 @@ apple$Note = horizon$Note[-na.idx]
 # Identify REDCap patients that are not in our data.
 idx = c(which(!(redcap$PTH_ID %in% unique(aster$PTH_ID))), which(is.na(redcap$cDNA_Change)))
 if (length(idx)>0)  {
-  write.table(redcap[idx, ], 'AllBatches/SNV_InDel/ClinicTag/REDCap_MissingPatients.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
   redcap = redcap[-idx, ]
   }
 
 ####################################################################################################################
-# Include only REDCap patients in aster.
-aster = aster[(aster$PTH_ID %in% redcap$PTH_ID), ]
-
 # Exact match for PTH_ID, Hugo_Symbol, Chrom, Start, Ref and Alt:
 redcap.tag = paste(redcap$PTH_ID, redcap$Hugo_Symbol, redcap$Chrom, redcap$Start, redcap$Ref, redcap$Alt, sep='_')
-aster.tag = paste(aster$PTH_ID, aster$Hugo_Symbol, aster$Chrom, aster$Start, aster$Ref, aster$Alt, sep='_')
-idx = match(redcap.tag, aster.tag)
-na.idx = which(is.na(idx))
 
-tmp = aster[idx[-na.idx], ]
-tmp$AF_Clinic = redcap$AF[-na.idx]
-tmp$Note = redcap$Note[-na.idx]
+idx = which(aster.tag %in% redcap.tag)
+
+aster$Tag[idx] = 'REDCap'
+
+tmp = aster[idx, maf.cols]
+idx.ref = match(aster.tag[idx], redcap.tag)
+tmp$AF_Clinic = redcap$AF[idx.ref]
+tmp$Note = redcap$Note[idx.ref]
+
 apple = rbind(apple, tmp)
-
-redcap = redcap[na.idx, ]
-aster = aster[-idx[-na.idx], ]
 
 ####################################################################################################################
 # Exact match for PTH_ID, Hugo_Symbol, Chrom, Start, and cDNA_Change.
 redcap.tag = paste(redcap$PTH_ID, redcap$Hugo_Symbol, redcap$Chrom, redcap$Start, redcap$cDNA_Change, sep='_')
 aster.tag = paste(aster$PTH_ID, aster$Hugo_Symbol, aster$Chrom, aster$Start, aster$cDNA_Change, sep='_')
-idx = match(redcap.tag, aster.tag)
-na.idx = which(is.na(idx))
 
-tmp = aster[idx[-na.idx], ]
-tmp$AF_Clinic = redcap$AF[-na.idx]
-tmp$Note = redcap$Note[-na.idx]
+idx = which((aster.tag %in% redcap.tag) & (aster$Tag==''))
+
+aster$Tag[idx] = 'REDCap'
+
+tmp = aster[idx, maf.cols]
+idx.ref = match(aster.tag[idx], redcap.tag)
+tmp$AF_Clinic = redcap$AF[idx.ref]
+tmp$Note = redcap$Note[idx.ref]
+
 apple = rbind(apple, tmp)
-
-redcap = redcap[na.idx, ]
-aster = aster[-idx[-na.idx], ]
 
 ####################################################################################################################
 # Exact match for PTH_ID, Hugo_Symbol, Chrom, and with loose match for Start.
@@ -114,44 +119,42 @@ aster.start = round(aster$Start/20)
 
 redcap.tag = paste(redcap$PTH_ID, redcap$Hugo_Symbol, redcap$Chrom, redcap.start, sep='_')
 aster.tag = paste(aster$PTH_ID, aster$Hugo_Symbol, aster$Chrom, aster.start, sep='_')
-idx = match(redcap.tag, aster.tag)
-na.idx = which(is.na(idx))
 
-redcap.miss = redcap[na.idx, ]
+idx = which((aster.tag %in% redcap.tag) & (aster$Tag==''))
 
-tmp = aster[idx[-na.idx], ]
-tmp$AF_Clinic = redcap$AF[-na.idx]
-tmp$Note = redcap$Note[-na.idx]
-tmp$Start_Clinic = redcap$Start[-na.idx]
-tmp$Ref_Clinic = redcap$Ref[-na.idx]
-tmp$Alt_Clinic = redcap$Alt[-na.idx]
-tmp$Refseq_ID_Clinic = redcap$Refseq_ID[-na.idx]
-tmp$cDNA_Change_Clinic = redcap$cDNA_Change[-na.idx]
-tmp$Protein_Change_Clinic = redcap$Protein_Change[-na.idx]
+# ******************************************************************
+# Manually check!
+# ******************************************************************
+idx.ref = match(aster.tag[idx], redcap.tag)
+check = cbind(redcap[idx.ref, 3:9], aster[idx, c(5,6,9,11,28,30)])
+check.1 = check[ ,c(2:4,9:11)]
 
-tmp = tmp[ ,c(4,1,5,2,3,6,19,7,20,8,21,9,22,10,23,11,24,12:18)]
+IDX.EXCLUDE = c(1)
 
-# Manually check tmp file.
-idx = 1:23
-tmp = tmp[idx, names(apple)]
+# ******************************************************************
+idx = idx[-IDX.EXCLUDE]
+idx.ref = match(aster.tag[idx], redcap.tag)
+
+aster$Tag[idx] = 'REDCap'
+
+tmp = aster[idx, maf.cols]
+idx.ref = match(aster.tag[idx], redcap.tag)
+tmp$AF_Clinic = redcap$AF[idx.ref]
+tmp$Note = redcap$Note[idx.ref]
 
 apple = rbind(apple, tmp)
 
-apple = apple[ ,c(4,1,5,2,3,6:18)]
-apple$AF = round(apple$AF, 3)
-apple$AF_VarDict = round(apple$AF_VarDict, 3)
-apple$AF_SNVer = round(apple$AF_SNVer, 3)
-apple$AF_LoFreq = round(apple$AF_LoFreq, 3)
-
 ####################################################################################################################
 # Save the results.
-write.table(apple, 'AllBatches/SNV_InDel/ClinicTag/CalledReferenceVariants.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
-write.table(redcap.miss, 'AllBatches/SNV_InDel/ClinicTag/MissedREDCapVariants.txt', row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
+write.table(apple, paste0('AllBatches_1/Result/SNV_InDel/MuTect2_1/ClinicTag_', filter.scheme, '.txt'),
+            row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
+write.table(aster, paste0('AllBatches_1/Result/SNV_InDel/MuTect2_1/FilteredVariants_', filter.scheme, '_Tagged.txt'),
+            row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
 
-write.xlsx(apple, 'AllBatches/SNV_InDel/ClinicTag/CalledReferenceVariants.xlsx', sheetName='ScanITD',
-           row.names=FALSE, col.names=TRUE, append=FALSE)
-write.xlsx(redcap.miss, 'AllBatches/SNV_InDel/ClinicTag/MissedREDCapVariants.xlsx', sheetName='ScanITD',
-           row.names=FALSE, col.names=TRUE, append=FALSE)
+####################################################################################################################
+####################################################################################################################
+
+  }
 
 ####################################################################################################################
 ####################################################################################################################
