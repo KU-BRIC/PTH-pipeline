@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Call variants, annotate and filter variants.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 14 July 2021
+# Last Modified: 8 August 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -43,7 +43,7 @@ then
   target_name=$(more /home/projects/cu_10184/projects/${dir_name}/Meta/BatchInfo.txt | awk -F '\t' -v batch="$batch" '( $1==batch ) {print $3}')
   if [ "${target_name}" = "" ]
   then
-    echo "Error: sh /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble.sh -d PTH -b [batch_name] -p [panel_name] -t 8BatchInfo.txt does not have any information for this batch."
+    echo "Error: BatchInfo.txt does not have any information for this batch."
     exit 1
   fi
 elif [ "$panel" = "panel1" ]
@@ -95,6 +95,7 @@ mkdir ${error_dir}
 rm -rf ${batch_dir}/Lock/SNV_InDel
 mkdir ${batch_dir}/Lock/SNV_InDel
 mkdir ${batch_dir}/Lock/SNV_InDel/VarDict
+mkdir ${batch_dir}/Lock/SNV_InDel/VarDict/vcf_0
 mkdir ${batch_dir}/Lock/SNV_InDel/VarDict/vcf
 mkdir ${batch_dir}/Lock/SNV_InDel/VarDict/maf
 mkdir ${batch_dir}/Lock/SNV_InDel/SNVer

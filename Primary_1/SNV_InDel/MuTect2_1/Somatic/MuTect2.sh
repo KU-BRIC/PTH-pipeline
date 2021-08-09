@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Run MuTect2 on tumor samples, and annotate variants.
 # Author: Haiying Kong
-# Last Modified: 21 July 2021
+# Last Modified: 8 August 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -10,11 +10,12 @@
 ####################################################################################################################
 ####################################################################################################################
 # Get batch name and number of thread from argument passing.
-while getopts ":d:b:" opt
+while getopts ":d:b:p:" opt
 do
   case $opt in
     d) dir_name="$OPTARG";;
     b) batch="$OPTARG";;
+    p) panel="$OPTARG";;
     \?) echo "Invalid option -$OPTARG" >&2;;
   esac
 done
@@ -31,6 +32,28 @@ fi
 if [ -z "$batch" ]
 then
   echo "Error: Batch name is empty"
+  exit 1
+fi
+
+if [ -z "$panel" ]
+then 
+  # find target file for this batch from BatchInfo.txt with batch name.
+  target_name=$(more /home/projects/cu_10184/projects/${dir_name}/Meta/BatchInfo.txt | awk -F '\t' -v batch="$batch" '( $1==batch ) {print $3}')
+  if [ "${target_name}" = "" ]
+  then 
+    echo "Error: BatchInfo.txt does not have any information for this batch."
+    exit 1
+  fi
+elif [ "$panel" = "panel1" ]
+then 
+  # Find target file for panel version 1.
+  target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38
+elif [ "$panel" = "panel2" ]
+then 
+  # Find target file for panel version 1.
+  target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38_190919225222_updated-to-v2
+else
+  echo "Error: Please input panel version from command line as panel1 or panel2, or update BatchInfo.txt"
   exit 1
 fi
 
@@ -102,7 +125,7 @@ do
   if ! [[ -s "${batch_dir}/temp/${sam}.txt" ]]
   then
     qsub -o ${log_dir}/${sam}.log -e ${error_dir}/${sam}.error -N ${batch}_${sam}_MuTect2_1  \
-      -v sam=${sam},batch_dir=${batch_dir}  \
+      -v target_name=${target_name},dir_name=${dir_name},batch_dir=${batch_dir},sam=${sam}  \
       /home/projects/cu_10184/projects/PTH/Code/Primary_1/SNV_InDel/MuTect2_1/Somatic/MuTect2_job.sh
   fi
 

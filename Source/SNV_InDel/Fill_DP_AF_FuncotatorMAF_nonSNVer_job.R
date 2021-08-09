@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Fill missing DPs and AFs in maf files output from Funcotator.
 # Author: Haiying Kong
-# Last Modified: 30 March 2021
+# Last Modified: 9 August 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
@@ -40,8 +40,8 @@ if (length(idx)>0)  {
     aster = vcf[idx, ]
     ans = sapply(aster$V8, function(x)  {
                              y = unlist(strsplit(x, ';'))
-                             dp = as.numeric(sub('DP=', '', y[grep('DP=', y)]))
-                             af = as.numeric(sub('AF=', '', y[grep('AF=', y)]))
+                             dp = as.numeric(sub('DP=', '', y[grep('^DP=', y)]))
+                             af = as.numeric(sub('AF=', '', y[grep('^AF=', y)]))
                              list(c(dp, af))
                              } )
     maf$DP[idx] = as.numeric(sapply(ans, function(x) unlist(x)[1]))

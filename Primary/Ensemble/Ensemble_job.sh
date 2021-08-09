@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 22 July 2021
+# Last Modified: 8 August 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -143,7 +143,10 @@ vardict -G $hg -N ${sample} -b ${batch_dir}/Lock/BAM/${sample}.bam ${target_noch
   -f ${allel_freq} -O ${map_qual} -q ${phred} -P ${var_pos} -o ${Qratio} -I ${indel_size}  \
   -M ${min_match} -L ${min_SV} -w ${ins_size} -W ${ins_SD} --nmfreq ${nmfreq} --mfreq ${mfreq}  \
   | teststrandbias.R \
-  | var2vcf_valid.pl -N ${sample} -E -f ${allel_freq} > ${batch_dir}/Lock/SNV_InDel/VarDict/vcf/${sample}.vcf
+  | var2vcf_valid.pl -N ${sample} -E -f ${allel_freq} > ${batch_dir}/Lock/SNV_InDel/VarDict/vcf_0/${sample}.vcf
+
+# Filter for PASS.
+awk -F '\t' '{if($1~/^#/ || $7=="PASS") print $0}' ${batch_dir}/Lock/SNV_InDel/VarDict/vcf_0/${sample}.vcf > ${batch_dir}/Lock/SNV_InDel/VarDict/vcf/${sample}.vcf
 
 # Annotation with Funcotator:
 gatk Funcotator \
