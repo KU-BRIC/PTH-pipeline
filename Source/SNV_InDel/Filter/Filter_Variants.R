@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Filter variants - NewScheme.
 # Author: Haiying Kong
-# Last Modified: 13 July 2021
+# Last Modified: 12 August 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
@@ -88,9 +88,9 @@ if (scheme_name=='Short')  {
 
 ###################################
 # Polymorphisms identified from our normal samples.
-flag.var = paste(var$Hugo_Symbol, var$Chromosome, var$Start_Position, var$End_Position, var$Reference_Allele, var$Tumor_Seq_Allele2, sep='_')
+var$flag = paste(var$Hugo_Symbol, var$Chromosome, var$Start_Position, var$End_Position, var$Reference_Allele, var$Tumor_Seq_Allele2, sep='_')
 flag.pon = apply(pon, 1, function(x) paste(x, collapse='_'))
-idx.pon = which(flag.var %in% flag.pon)
+idx.pon = which(var$flag %in% flag.pon)
 
 ###################################
 # Find index list for exclusion.
@@ -110,10 +110,6 @@ idx.civic = which(var$Label %in% civic$Label)
 
 idx.include = unique(c(idx.clinvar.in, idx.civic))
 
-# Create one column to tag inclusion.
-var$Inclusion = 0
-var$Inclusion[idx.include] = 1
-
 ####################################################################################################################
 # Combine inclusion and exclusion list with inclusion higher priority.
 
@@ -126,17 +122,19 @@ var = var[-idx, ]
 ####################################################################################################################
 # Filter out region specific technical errors.
 error$flag = apply(error[ ,1:6], 1, function(x) paste(x, collapse='_'))
-idx.var = which(flag.var %in% error$flag)
+idx.var = which(var$flag %in% error$flag)
 
 if (length(idx.var) > 0)  {
   i.del = c()
-  idx.error = match(flag.var[idx.var], error$flag)
+  idx.error = match(var$flag[idx.var], error$flag)
   for (i in 1:length(idx.var))  {
     if (abs(error$UpperCenter[idx.error[i]]-var$AF[idx.var[i]]) > abs(error$LowerCenter[idx.error[i]]-var$AF[idx.var[i]]))
       i.del = c(i.del, idx.var[i])
     }
   if (length(i.del) > 0)  var = var[-i.del, ]
   }
+
+var = var[ ,-ncol(var)]
 
 ####################################################################################################################
 # Save the list of variants after filtering.

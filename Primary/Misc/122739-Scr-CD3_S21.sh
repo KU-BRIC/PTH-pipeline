@@ -37,7 +37,7 @@ export PATH=/home/projects/cu_10184/people/haikon/Software/samtools-1.12/bin/:$P
 # Delete rows of problem.
 mv ${batch_dir}/Lock/SNV_InDel/VarDict/vcf/${sam}.vcf ${batch_dir}/Lock/SNV_InDel/VarDict/vcf/${sam}_0.vcf
 rm -f ${batch_dir}/Lock/SNV_InDel/VarDict/maf/${sam}.maf
-awk -F '\t' '{if !($1=="chr17" && ($2==76736873 || $2==76736971)) print $0}' ${batch_dir}/Lock/SNV_InDel/VarDict/vcf/${sam}_0.vcf > ${batch_dir}/Lock/SNV_InDel/VarDict/vcf/${sam}.vcf
+awk -F '\t' '{if (!($1=="chr17" && ($2==76736873 || $2==76736971))) print $0}' ${batch_dir}/Lock/SNV_InDel/VarDict/vcf/${sam}_0.vcf > ${batch_dir}/Lock/SNV_InDel/VarDict/vcf/${sam}.vcf
 
 ####################################################################################################################
 ####################################################################################################################
