@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 8 August 2021
+# Last Modified: 17 September 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -46,8 +46,6 @@ ScanITD="/home/projects/cu_10184/people/haikon/Software/ScanITD/ScanITD.py"
 getITD="python3 /home/projects/cu_10184/people/haikon/Software/getITD/getitd.py"
 FASTQuick="/home/projects/cu_10184/people/haikon/Software/FASTQuick/bin/FASTQuick.sh"
 
-export PATH=/home/projects/cu_10184/people/haikon/Software/samtools-1.12/bin/:$PATH
-
 ####################################################################################################################
 # Set parameters.
 itd_scheme="Scheme_2"
@@ -70,6 +68,8 @@ bwa mem \
   -t ${n_thread} \
   > ${batch_dir}/Lock/BAM/${sample}_bwa.sam
 
+if [ $? -ne 0 ];  then echo "Failed at 'bwa mem'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 $picard FastqToSam \
   F1=${fq_dir}/${sample}_R1.fq.gz \
   F2=${fq_dir}/${sample}_R2.fq.gz \
@@ -77,11 +77,15 @@ $picard FastqToSam \
   PL=ILLUMINA \
   SM=${sample}
 
+if [ $? -ne 0 ];  then echo "Failed at 'picard FastqToSam'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 $picard MergeBamAlignment \
   R=$hg \
   ALIGNED=${batch_dir}/Lock/BAM/${sample}_bwa.sam \
   UNMAPPED=${batch_dir}/Lock/BAM/${sample}_unmapped.sam \
   O=${batch_dir}/Lock/BAM/${sample}_mapped.bam
+
+if [ $? -ne 0 ];  then echo "Failed at 'picard MergeBamAlignment'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 rm ${batch_dir}/Lock/BAM/${sample}_bwa.sam
 rm ${batch_dir}/Lock/BAM/${sample}_unmapped.sam
@@ -96,9 +100,13 @@ gatk MarkDuplicatesSpark \
   --create-output-bam-index false \
   --create-output-bam-splitting-index false
 
+if [ $? -ne 0 ];  then echo "Failed at 'gatk MarkDuplicatesSpark'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 rm ${batch_dir}/Lock/BAM/${sample}_mapped.bam
 
 $picard ValidateSamFile I=${batch_dir}/Lock/BAM/${sample}_dup_sort.bam MODE=SUMMARY
+
+if [ $? -ne 0 ];  then echo "Failed at 'picard ValidateSamFile'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 #########################################
 # Base quality score recalibration (BQSR):
@@ -109,11 +117,15 @@ gatk BaseRecalibrator \
   -I ${batch_dir}/Lock/BAM/${sample}_dup_sort.bam \
   -O ${batch_dir}/Lock/BAM/${sample}_recal_data.table
 
+if [ $? -ne 0 ];  then echo "Failed at 'gatk BaseRecalibrator'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 gatk ApplyBQSR \
   -R $hg \
   -I ${batch_dir}/Lock/BAM/${sample}_dup_sort.bam \
   --bqsr-recal-file ${batch_dir}/Lock/BAM/${sample}_recal_data.table \
   -O ${batch_dir}/Lock/BAM/${sample}.bam
+
+if [ $? -ne 0 ];  then echo "Failed at 'gatk ApplyBQSR'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
  
 rm ${batch_dir}/Lock/BAM/${sample}_dup_sort.bam
 mv ${batch_dir}/Lock/BAM/${sample}_marked_dup_metrics.txt ${batch_dir}/Lock/BAM/lock/
@@ -145,8 +157,12 @@ vardict -G $hg -N ${sample} -b ${batch_dir}/Lock/BAM/${sample}.bam ${target_noch
   | teststrandbias.R \
   | var2vcf_valid.pl -N ${sample} -E -f ${allel_freq} > ${batch_dir}/Lock/SNV_InDel/VarDict/vcf_0/${sample}.vcf
 
+if [ $? -ne 0 ];  then echo "Failed at 'vardict'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 # Filter for PASS.
 awk -F '\t' '{if($1~/^#/ || $7=="PASS") print $0}' ${batch_dir}/Lock/SNV_InDel/VarDict/vcf_0/${sample}.vcf > ${batch_dir}/Lock/SNV_InDel/VarDict/vcf/${sample}.vcf
+
+if [ $? -ne 0 ];  then echo "Failed at filtering for VarDict calls." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 # Annotation with Funcotator:
 gatk Funcotator \
@@ -154,8 +170,12 @@ gatk Funcotator \
   --output-file-format MAF --ref-version hg38 --data-sources-path ${Funcotator_DB} \
   --disable-sequence-dictionary-validation
 
+if [ $? -ne 0 ];  then echo "Failed at annotation for VarDict calls." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 # Fill missing DP and AF in Funcotator maf output.
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_FuncotatorMAF_nonSNVer_job.R ${batch_dir}/Lock/SNV_InDel/VarDict ${sample} 'VarDict'
+
+if [ $? -ne 0 ];  then echo "Failed at filling missing DP and AF for annotated VarDict calls." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 ####################################################################################################################
 # SNVer:
@@ -173,9 +193,13 @@ min_r_alt_ref=0.25
 
 # Run SNVer.
 conda activate
+
 snver -r $hg -i ${batch_dir}/Lock/BAM/${sample}.bam -o ${batch_dir}/Lock/SNV_InDel/SNVer/vcf/${sample}  \
   -l ${target_chr} -n ${num_hap} -het ${het} -mq ${map_qual} -bq ${base_qual} -s ${str_bias}  \
   -f ${fish_thresh} -p ${p_thresh} -a ${min_read_strand} -b ${min_r_alt_ref}
+
+if [ $? -ne 0 ];  then echo "Failed at 'snver'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 conda deactivate
 
 # Annotation with Funcotator:
@@ -183,13 +207,20 @@ gatk Funcotator \
   -R $hg -V ${batch_dir}/Lock/SNV_InDel/SNVer/vcf/${sample}.filter.vcf -O ${batch_dir}/Lock/SNV_InDel/SNVer/maf/${sample}.snv.maf \
   --output-file-format MAF --ref-version hg38 --data-sources-path ${Funcotator_DB} \
   --disable-sequence-dictionary-validation
+
+if [ $? -ne 0 ];  then echo "Failed at annotation for SNVer SNV calls." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 gatk Funcotator \
   -R $hg -V ${batch_dir}/Lock/SNV_InDel/SNVer/vcf/${sample}.indel.filter.vcf -O ${batch_dir}/Lock/SNV_InDel/SNVer/maf/${sample}.indel.maf \
   --output-file-format MAF --ref-version hg38 --data-sources-path ${Funcotator_DB} \
   --disable-sequence-dictionary-validation
 
+if [ $? -ne 0 ];  then echo "Failed at annotation for SNVer InDels calls." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 # Fill missing DP and AF in Funcotator maf output.
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_FuncotatorMAF_SNVer_job.R ${batch_dir}/Lock/SNV_InDel/SNVer ${sample} 'SNVer'
+
+if [ $? -ne 0 ];  then echo "Failed at filling missing DP and AF for annotated SNVer calls." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 ####################################################################################################################
 # LoFreq:
@@ -206,14 +237,20 @@ lofreq call-parallel --pp-threads ${n_thread} --call-indels -f $hg -l ${target_c
   -q ${min_bq} -Q ${min_alt_bq} -m ${min_mq} -a ${sig} -C ${min_cov}  \
   -o ${batch_dir}/Lock/SNV_InDel/LoFreq/vcf/${sample}.vcf ${batch_dir}/Lock/BAM/${sample}.bam
 
+if [ $? -ne 0 ];  then echo "Failed at 'lofreq call-parallel'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 # Annotation with Funcotator:
 gatk Funcotator \
   -R $hg -V ${batch_dir}/Lock/SNV_InDel/LoFreq/vcf/${sample}.vcf -O ${batch_dir}/Lock/SNV_InDel/LoFreq/maf/${sample}.maf \
   --output-file-format MAF --ref-version hg38 --data-sources-path ${Funcotator_DB} \
   --disable-sequence-dictionary-validation
 
+if [ $? -ne 0 ];  then echo "Failed at annotation for LoFreq calls." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 # Fill missing DP and AF in Funcotator maf output.
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_FuncotatorMAF_nonSNVer_job.R ${batch_dir}/Lock/SNV_InDel/LoFreq ${sample} 'LoFreq'
+
+if [ $? -ne 0 ];  then echo "Failed at filling missing DP and AF for annotated LoFreq calls." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 ####################################################################################################################
 # Combine SNV_InDel variants from 3 callers and filter.
@@ -221,17 +258,25 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Fill_DP_AF_Fu
 # Combine variants from 3 callers.
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Combine_Variants_AllCallers.R ${batch_dir}/Lock/SNV_InDel ${batch_dir}/Result/SNV_InDel/AllVariants ${batch} ${sample}
 
+if [ $? -ne 0 ];  then echo "Failed at combining variants from 3 callers." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 ####################################################################################################################
 # Filter.
 ####################################################################################################################
 # Long:
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${batch_dir}/Result/SNV_InDel ${sample} "PTH" "Long"
 
+if [ $? -ne 0 ];  then echo "Failed at filtering with Long Scheme." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 # Medium:
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${batch_dir}/Result/SNV_InDel ${sample} "PTH" "Medium"
 
+if [ $? -ne 0 ];  then echo "Failed at filtering with Medium Scheme." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 # Short:
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/SNV_InDel/Filter/Filter_Variants.R ${batch_dir}/Result/SNV_InDel ${sample} "PTH" "Short"
+
+if [ $? -ne 0 ];  then echo "Failed at filtering with Short Scheme." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 ####################################################################################################################
 ####################################################################################################################
@@ -261,6 +306,8 @@ toil_cnacs run \
     --fasta $hg \
     --samp ${batch_dir}/Lock/BAM/${sample}.bam
 
+if [ $? -ne 0 ];  then echo "Failed at CNACS." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 rm -r ${batch_dir}/Lock/CNV/CNACS/${sample}/tmp
 rm -r ${batch_dir}/Lock/CNV/CNACS/${sample}/jobstore
 
@@ -274,10 +321,17 @@ cnvkit.py batch ${batch_dir}/Lock/BAM/${sample}.bam \
     --reference ${cnvkit_pon} \
     --output-dir ${batch_dir}/Lock/CNV/CNVkit
 
+if [ $? -ne 0 ];  then echo "Failed at CNVkit." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 echo "cnvkit.py scatter ${batch_dir}/Lock/CNV/CNVkit/${sample}.cnr -s ${batch_dir}/Lock/CNV/CNVkit/${sample}.cns -o ${batch_dir}/Lock/CNV/CNVkit/${sample}.scatter.pdf"
 
 cnvkit.py scatter ${batch_dir}/Lock/CNV/CNVkit/${sample}.cnr -s ${batch_dir}/Lock/CNV/CNVkit/${sample}.cns -o ${batch_dir}/Lock/CNV/CNVkit/${sample}.scatter.pdf
+
+if [ $? -ne 0 ];  then echo "Failed at CNVkit scatter plot." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 cnvkit.py diagram ${batch_dir}/Lock/CNV/CNVkit/${sample}.cnr -s ${batch_dir}/Lock/CNV/CNVkit/${sample}.cns -o ${batch_dir}/Lock/CNV/CNVkit/${sample}.diagram.pdf
+
+if [ $? -ne 0 ];  then echo "Failed at CNVkit diagram plot." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 conda deactivate
 
@@ -290,6 +344,8 @@ mkdir -p ${batch_dir}/Lock/DepthOfCoverage/DensityPlot
 
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/DOC/HelloRanges_one_sample_CoverageFreqPlot.R ${batch_dir}/Lock/BAM ${sample}.bam ${target_nopad} ${batch_dir}/Lock/DepthOfCoverage
 
+if [ $? -ne 0 ];  then echo "Failed at DepthOfCoverage." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 ####################################################################################################################
 ####################################################################################################################
 # ITD identification on FLT3.
@@ -298,28 +354,44 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/DOC/HelloRanges_one_sam
 ################################################
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/VarDict_FilterClean.R ${batch} ${sample} ${batch_dir}/Lock/SNV_InDel/VarDict ${batch_dir}/Lock/ITD/VarDict
 
+if [ $? -ne 0 ];  then echo "Failed at filtering ITDs from VarDict calls." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 ####################################################################################################################
 # Pindel:
 ################################################
 # Run Pindel.
 conda activate
+
 echo -e ${batch_dir}/Lock/BAM/${sample}.bam"\t"250"\t"${sample} > ${batch_dir}/Lock/ITD/Pindel/${sample}_config.txt
+
 pindel -f $hg -t ${target_itd} -c chr13:28033736-28034557  \
        -i ${batch_dir}/Lock/ITD/Pindel/${sample}_config.txt -o ${batch_dir}/Lock/ITD/Pindel/${sample}  \
        -T $n_thread -x 3 -u 0.04
+
+if [ $? -ne 0 ];  then echo "Failed at ITD calling with Pindel." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 rm ${batch_dir}/Lock/ITD/Pindel/${sample}_config.txt
 pindel2vcf -p ${batch_dir}/Lock/ITD/Pindel/${sample}_TD -r $hg -R HG38 -d 20201224 -v ${batch_dir}/Lock/ITD/Pindel/${sample}.vcf
+
+if [ $? -ne 0 ];  then echo "Failed at converting Pindel output to vcf format." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 conda deactivate
 
 # Clean the output vcf.
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/Pindel_Clean.R ${batch} ${sample} ${batch_dir}/Lock/ITD/Pindel
+
+if [ $? -ne 0 ];  then echo "Failed at cleaning ITDs called with Pindel." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 ####################################################################################################################
 # ScanITD:
 ################################################
 # Run ScanITD.
 conda activate ScanITD
+
 $ScanITD -r $hg -t ${target_itd} -i ${batch_dir}/Lock/BAM/${sample}.bam -o ${batch_dir}/Lock/ITD/ScanITD/${sample} -m 20 -c 1 -d 100 -f 0.0001 -l 5 -n 3
+
+if [ $? -ne 0 ];  then echo "Failed at ITD calling with ScanITD." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 conda deactivate
 
 #  -m MAPQ, --mapq MAPQ  minimal MAPQ in BAM for calling ITD (default: 15)
@@ -333,6 +405,8 @@ conda deactivate
 # Clean the output tsv.
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/ScanITD_Clean.R ${batch} ${sample} ${batch_dir}/Lock/ITD/ScanITD
 
+if [ $? -ne 0 ];  then echo "Failed at cleaning ITDs called with ScanITD." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 ####################################################################################################################
 # getITD:
 ################################################
@@ -340,14 +414,23 @@ Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/ScanI
 mkdir ${batch_dir}/Lock/ITD/getITD/${sample}
 cd ${batch_dir}/Lock/ITD/getITD/${sample}
 bedtools intersect -abam ${batch_dir}/Lock/BAM/${sample}.bam -b ${target_flt3} -u > FLT3.bam
+
+if [ $? -ne 0 ];  then echo "Failed at preparing input file for getITD with 'bedtools intersect'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 # samtools view -b ${BAM_dir}/${sample}.bam chr13:28033736-28034557 > FLT3.bam
 samtools sort -n FLT3.bam > tmp.bam
 mv tmp.bam FLT3.bam
 bedtools bamtofastq -i FLT3.bam -fq FLT3_R1.fq -fq2 FLT3_R2.fq
 
+if [ $? -ne 0 ];  then echo "Failed at preparing input file for getITD with 'bedtools bamtofastq'." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 # Run getITD.
 conda activate getITD
+
 $getITD -reference ${getITD_reference} -anno ${getITD_anno} -infer_sense_from_alignment True -plot_coverage True -require_indel_free_primers False -min_read_length 50 -min_bqs 20 -min_read_copies 1 -filter_ins_vaf 0.001 ${sample} FLT3_R1.fq FLT3_R2.fq
+
+if [ $? -ne 0 ];  then echo "Failed at ITD calling with getITD." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 conda deactivate
 
 # Clean the output folder.
@@ -357,6 +440,8 @@ rm -r ${sample}_getitd
 
 # Clean the output tsv.
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/getITD_Clean.R ${batch} ${sample} ${batch_dir}/Lock/ITD/getITD
+
+if [ $? -ne 0 ];  then echo "Failed at cleaning ITDs called with getITD." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 ####################################################################################################################
 # Plot zoom out IGV for whole FLT3 region.
@@ -377,12 +462,18 @@ exit
 EOF
 
 /home/projects/cu_10184/people/haikon/Software/IGV_Linux_2.9.0/igv_auto.sh -b ${batch_dir}/Lock/ITD/IGV/${sample}_batch.bat
+
+if [ $? -ne 0 ];  then echo "Failed at IGV plot for a specific region on FLT3." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 rm ${batch_dir}/Lock/ITD/IGV/${sample}_batch.bat
 
 ####################################################################################################################
 # Combine the outcome from different tools to come up with final ITD list.
 ################################################
 Rscript /home/projects/cu_10184/projects/PTH/Code/Source/ITD/${itd_scheme}/Combine_Filter.R ${batch} ${sample} ${batch_dir}/Lock/ITD ${batch_dir}/Result/ITD ${itd_thresh_n_alt}
+
+if [ $? -ne 0 ];  then echo "Failed at combining ITDs called with VarDict, Pindel, ScanITD, and getITD." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
+
 
 ####################################################################################################################
 # Plot zoom in IGV if any ITD is identified for this sample.
@@ -396,6 +487,8 @@ do
   cat $batfile
   rm ${batfile}
 done 
+
+if [ $? -ne 0 ];  then echo "Failed at zoom-in IGV plot for each ITD." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 # Remove .bam.bai and .bat files.
 rm ${batch_dir}/Lock/BAM/${sample}.bam.bai
@@ -429,6 +522,8 @@ ${FASTQuick}  \
   --candidateVCF ${fastquick_resource_dir}/1000g.phase3.10k.b37.vcf.gz  \
   --SVDPrefix ${fastquick_resource_dir}/1000g.phase3.10k.b37.vcf.gz  \
   --nThread ${n_thread}
+
+if [ $? -ne 0 ];  then echo "Failed at FASTQuick." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 ####################################################################################################################
 ####################################################################################################################
