@@ -525,5 +525,8 @@ ${FASTQuick}  \
 
 if [ $? -ne 0 ];  then echo "Failed at FASTQuick." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
+# Get QC summary table.
+Rscript /home/projects/cu_10184/projects/PTH/Code/QC/QC_Summary/SummaryMetrics.R ${batch} ${sample}
+
 ####################################################################################################################
 ####################################################################################################################

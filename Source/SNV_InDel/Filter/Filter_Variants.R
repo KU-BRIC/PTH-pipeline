@@ -1,8 +1,8 @@
 ####################################################################################################################
 ####################################################################################################################
-# Filter variants - NewScheme.
+# Filter variants.
 # Author: Haiying Kong
-# Last Modified: 12 August 2021
+# Last Modified: 18 December 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
@@ -10,6 +10,7 @@
 options(stringsAsFactors=FALSE)
 rm(list=ls())
 
+library(parallel)
 library(xlsx)
 
 # Get argument values from command line.
@@ -24,6 +25,7 @@ scheme_name = args[4]
 var.classes = c('DE_NOVO_START_IN_FRAME', 'DE_NOVO_START_OUT_FRAME', 'Frame_Shift_Del', 'Frame_Shift_Ins',
                 'In_Frame_Del', 'In_Frame_Ins', 'Missense_Mutation', 'Nonsense_Mutation', 'Nonstop_Mutation',
                 'Splice_Site', 'START_CODON_SNP', 'Translation_Start_Site')
+thresh_dp_high_fold = 10
 
 ####################################################################################################################
 ####################################################################################################################
@@ -37,6 +39,7 @@ error = read.table(paste0(ref.dir, '/RegionSpecificTechnicalError.txt'), header=
 ####################################################################################################################
 # Read in the table with all variants.
 var = read.table(paste0(res.dir, '/AllVariants/Callers_Wide/', sam, '.maf'), header=TRUE, quote='', sep='\t')
+thresh_dp_high = quantile(var$DP, probs=0.5) * 10
 
 ####################################################################################################################
 ####################################################################################################################
@@ -44,7 +47,7 @@ var = read.table(paste0(res.dir, '/AllVariants/Callers_Wide/', sam, '.maf'), hea
 ####################################################################################################################
 # Filter out technical errors.
 ####################################################################################################################
-var = var[(var$t_alt_count>=thresh$thresh_n_alt & var$DP>=thresh$thresh_dp_low & var$DP<=thresh$thresh_dp_high), ]
+var = var[(var$t_alt_count>=thresh$thresh_n_alt & var$DP>=thresh$thresh_dp_low & var$DP<=thresh_dp_high), ]
 
 ####################################################################################################################
 # Filter out unwanted variant classes.
@@ -88,13 +91,36 @@ if (scheme_name=='Short')  {
 
 ###################################
 # Polymorphisms identified from our normal samples.
-var$flag = paste(var$Hugo_Symbol, var$Chromosome, var$Start_Position, var$End_Position, var$Reference_Allele, var$Tumor_Seq_Allele2, sep='_')
-flag.pon = apply(pon, 1, function(x) paste(x, collapse='_'))
+var$flag = paste(var$Chromosome, as.character(var$Start_Position), as.character(var$End_Position), var$Reference_Allele, var$Tumor_Seq_Allele2, sep='_')
+flag.pon = paste(pon$Chrom, as.character(pon$Start), as.character(pon$End), pon$Ref, pon$Alt, sep='_')
 idx.pon = which(var$flag %in% flag.pon)
 
 ###################################
+# Black list:
+bed = read.table('/home/projects/cu_10184/projects/PTH/Reference/Filtering/BlackList/black.bed', header=TRUE, sep='\t')
+bed = bed[(bed$Sample=='Global' | bed$Sample==sam), ]
+n.cores = detectCores()
+ans1 = mclapply(1:nrow(var), function(i)  {
+                               idx = which(bed$Chrom==var$Chromosome[i] & bed$Start<=var$Start_Position[i] & bed$End>=var$End_Position[i])
+                               if (length(idx)>0)
+                                 flag = 1   else
+                                 flag = 0   
+                               flag
+                               },
+                mc.cores = n.cores)
+ans1 = which(ans1==1)
+
+vcf = read.table('/home/projects/cu_10184/projects/PTH/Reference/Filtering/BlackList/black.vcf', header=TRUE, sep='\t')
+vcf = vcf[(vcf$Sample=='Global' | vcf$Sample==sam), ]
+flag.vcf = apply(vcf, 1, function(x) paste(x, collapse='_'))
+var$flag1 = paste(var$Chromosome, var$Start_Position, var$Reference_Allele, var$Tumor_Seq_Allele2, sep='_')
+ans2 = which(var$flag1 %in% flag.vcf)
+
+idx.black = c(ans1, ans2)
+
+###################################
 # Find index list for exclusion.
-idx.exclude = unique(c(idx.dbsnp, idx.maf, idx.clinvar.ex, idx.cosmic.ex, idx.pon))
+idx.exclude = unique(c(idx.dbsnp, idx.maf, idx.clinvar.ex, idx.cosmic.ex, idx.pon, idx.black))
 
 ####################################################################################################################
 # Identify variants for inclusion with highest priority.
@@ -105,10 +131,33 @@ idx.clinvar.in = unique(c(grep('Pathogenic', var$ClinVar_VCF_CLNSIG), grep('Like
 
 # CIViC:               
 civic = read.table('/home/projects/cu_10184/people/haikon/Reference/CIViC/hg38/01-Aug-2020-civic_accepted_and_submitted.vcf', header=FALSE, quote='', sep='\t')[ ,c(1,2,4,5)]
-civic$Label = paste(civic$V1, as.character(civic$V2), civic$V4, civic$V5, sep='_')
-idx.civic = which(var$Label %in% civic$Label)
+civic$flag = paste(civic$V1, as.character(civic$V2), civic$V4, civic$V5, sep='_')
+idx.civic = which(var$flag %in% civic$flag)
 
-idx.include = unique(c(idx.clinvar.in, idx.civic))
+###################################
+# White list:
+bed = read.table('/home/projects/cu_10184/projects/PTH/Reference/Filtering/WhiteList/white.bed', header=TRUE, sep='\t')
+bed = bed[(bed$Sample=='Global' | bed$Sample==sam), ]
+n.cores = detectCores()
+ans1 = mclapply(1:nrow(var), function(i)  {
+                               idx = which(bed$Chrom==var$Chromosome[i] & bed$Start<=var$Start_Position[i] & bed$End>=var$End_Position[i])
+                               if (length(idx)>0)
+                                 flag = 1   else
+                                 flag = 0
+                               flag
+                               },
+                mc.cores = n.cores)
+ans1 = which(ans1==1)
+
+vcf = read.table('/home/projects/cu_10184/projects/PTH/Reference/Filtering/WhiteList/white.vcf', header=TRUE, sep='\t')
+vcf = vcf[(vcf$Sample=='Global' | vcf$Sample==sam), ]
+flag.vcf = apply(vcf, 1, function(x) paste(x, collapse='_'))
+var$flag1 = paste(var$Chromosome, var$Start_Position, var$Reference_Allele, var$Tumor_Seq_Allele2, sep='_')
+ans2 = which(var$flag1 %in% flag.vcf)
+
+idx.white = c(ans1, ans2)
+
+idx.include = unique(c(idx.clinvar.in, idx.civic, idx.white))
 
 ####################################################################################################################
 # Combine inclusion and exclusion list with inclusion higher priority.
@@ -139,8 +188,10 @@ var = var[ ,-ncol(var)]
 ####################################################################################################################
 # Save the list of variants after filtering.
 write.table(var, paste0(res.dir, '/Filtered/', scheme_name, '/', sam, '.maf'), row.names=FALSE, col.names=TRUE, quote=FALSE, sep='\t')
-write.xlsx(var, paste0(res.dir, '/Filtered/', scheme_name, '/', sam, '.xlsx'), sheetName=paste0('Filtered_', scheme_name),
-           row.names=FALSE, col.names=TRUE, append=FALSE)
+if (nrow(var)>0)  {
+  write.xlsx(var, paste0(res.dir, '/Filtered/', scheme_name, '/', sam, '.xlsx'), sheetName=paste0('Filtered_', scheme_name),
+             row.names=FALSE, col.names=TRUE, append=FALSE)
+  }
 
 ####################################################################################################################
 ####################################################################################################################

@@ -52,7 +52,7 @@ then
   target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38
 elif [ "$panel" = "panel2" ]
 then
-  # Find target file for panel version 1.
+  # Find target file for panel version 2.
   target_name=all_target_segments_covered_by_probes_Schmidt_Myeloid_TE-98545653_hg38_190919225222_updated-to-v2
 else
   echo "Error: Please input panel version from command line as panel1 or panel2, or update BatchInfo.txt"
