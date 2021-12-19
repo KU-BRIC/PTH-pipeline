@@ -2,10 +2,9 @@
 ####################################################################################################################
 # Get summary metrics table from QC.
 # Author: Haiying Kong
-# Last Modified: 18 December 2021
+# Last Modified: 19 December 2021
 ####################################################################################################################
 ####################################################################################################################
-setwd('/home/projects/cu_10184/projects/PTH')
 options(stringsAsFactors=FALSE)
 rm(list=ls())
 
@@ -14,12 +13,15 @@ apple.cols = c()
 
 # Get passed argument values.
 args = commandArgs(trailingOnly=TRUE)
-batch = args[1]
-sam = args[2]
+dir_name = args[1]
+batch = args[2]
+sam = args[3]
+
+setwd(paste0('/home/projects/cu_10184/projects/', dir_name))
 
 # Set parameters.
-doc.dir = paste0('/home/projects/cu_10184/projects/PTH/BatchWork/', batch, '/Lock/DepthOfCoverage/FreqTable')
-qc.dir = paste0('/home/projects/cu_10184/projects/PTH/QC/Result/FASTQuick/ByBatch/', batch, '/', sam)
+doc.dir = paste0('/home/projects/cu_10184/projects/', dir_name, '/BatchWork/', batch, '/Lock/DepthOfCoverage/FreqTable')
+qc.dir = paste0('/home/projects/cu_10184/projects/', dir_name, '/QC/Result/FASTQuick/ByBatch/', batch, '/', sam)
 
 ####################################################################################################################
 ####################################################################################################################

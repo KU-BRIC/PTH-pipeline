@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Get summary table for QC.
 # Author: Haiying Kong
-# Last Modified: 18 December 2021
+# Last Modified: 19 December 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -63,7 +63,7 @@ sams=($(echo ${bam_files[@]%.bam} | tr ' ' '\n' | sort -u | tr '\n' ' '))
 for sam in ${sams[@]}
 do
   qsub -o ${log_dir}/${sam}.log -e ${error_dir}/${sam}.error -N ${batch}_${sam}_QC_Summary \
-    -v batch=${batch},sam=${sam} \
+    -v dir_name=${dir_name},batch=${batch},sam=${sam} \
     /home/projects/cu_10184/projects/PTH/Code/QC/QC_Summary/SummaryMetrics_job.sh
 done
 

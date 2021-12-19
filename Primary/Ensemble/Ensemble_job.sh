@@ -2,7 +2,7 @@
 ####################################################################################################################
 # Pre-process, call variants, annotate and filter variants - job.
 # Author: Haiying Kong and Balthasar Schlotmann
-# Last Modified: 17 September 2021
+# Last Modified: 19 December 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/bin/bash -i
@@ -526,7 +526,7 @@ ${FASTQuick}  \
 if [ $? -ne 0 ];  then echo "Failed at FASTQuick." >> ${batch_dir}/RedFlag/${sample}.txt;  fi
 
 # Get QC summary table.
-Rscript /home/projects/cu_10184/projects/PTH/Code/QC/QC_Summary/SummaryMetrics.R ${batch} ${sample}
+Rscript /home/projects/cu_10184/projects/PTH/Code/QC/QC_Summary/SummaryMetrics.R ${dir_name} ${batch} ${sample}
 
 ####################################################################################################################
 ####################################################################################################################
