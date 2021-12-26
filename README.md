@@ -1,5 +1,5 @@
  
-# Automatic Pipeline for Panel Sequence Data
+# Automatic Pipeline for Panel Sequence Data --- Primary patient sample
 
 
 ## Objectives.
@@ -236,6 +236,19 @@ The thresholds for the three schemes are saved as:
 
 (ii) For the list for exclusion candidate, the 'Long' and 'Medium' schemes exclude variants that do not have any information on the column "COSMIC_tissue_types_affected" from Funcotator annotation, while the 'Short' scheme excludes variants that do not have any information on the column "COSMIC_overlapping_mutations" from Funcotator annotation.
 
+(6) White list and black list.
+white list are saved as:
+
+    /home/projects/cu_10184/projects/PTH/Reference/Filtering/BlackList/white.bed
+    /home/projects/cu_10184/projects/PTH/Reference/Filtering/BlackList/white.vcf
+
+black list are saved as:
+
+    /home/projects/cu_10184/projects/PTH/Reference/Filtering/BlackList/black.bed
+    /home/projects/cu_10184/projects/PTH/Reference/Filtering/BlackList/black.vcf
+
+If there is contradiction between white and black list, black list wins.
+
 ###### Three filtering schemes.
 
 In order to perform filtering with three schemes that are installed in the pipeline, please run:
@@ -332,6 +345,22 @@ To rerun Somalier:
     sh /home/projects/cu_10184/projects/PTH/Code/QC/Somalier/Somalier.sh -d [project_name] -b [batch_name]
     -d: The project name, for example, PTH.
     -b: The batch name, for example, Primary_001
+    
+To run only the part of pipeline to get our QC summary table:
+
+    sh /home/projects/cu_10184/projects/PTH/Code/QC/QC_Summary/SubmitJobs_AllBatches.sh
+
+Then, the QC summary table of each sample can be found as:
+
+    /home/projects/cu_10184/projects/PTH/QC/Result/FASTQuick/ByBatch/[batch_name]/[sample_name]/OurSummary.txt
+
+To get QC summary table for all samples from all batches:
+
+    Rscript /home/projects/cu_10184/projects/PTH/Code/QC/QC_Summary/AllSamples_QC_Summary.R
+
+The result will be at:
+
+    /home/projects/cu_10184/projects/PTH/QC/Result/FASTQuick/AllBatches/QC_Summary.txt
 
 #### To run pipeline with a new panel.
 (1) Save target files as bed files under the designated directories.
@@ -362,4 +391,50 @@ To rerun Somalier:
 (3) Run the pipeline without passing any values to the argument -p. For instance,
 
     sh /home/projects/cu_10184/projects/PTH/Code/Primary/Ensemble/Ensemble.sh -d PTH -b [batch_name] -t 8
-## 
+
+
+# Automatic Pipeline for Panel Sequence Data --- PDXample
+
+## Classification of reads into 5 categories: human, mouse, both, neither, ambiguous.
+Summary table for the reads in each category can be found in:
+
+    /home/projects/cu_10184/projects/PTH/PanelSeqData/PDX_001/meta/Summary_ReadCounts_xengsort.txt
+
+## Reads from human are analyzed to identify genetic variants with the command:
+
+    sh /home/projects/cu_10184/projects/PTH/Code/PDX/Ensemble/Ensemble.sh -d PTH -b [batch_name] -t [num_thread] -c xengsort -h [thresh_num_human_reads]
+    -b: batch name.
+    -t: number of threads to use on computerome.
+    -h: minimum number of reads from human to be analyzed.
+
+### Intermediate results can be found:
+
+    /home/projects/cu_10184/projects/PTH/BatchWork/[batch_name]/Lock
+    
+### Final results can be found:
+
+    /home/projects/cu_10184/projects/PTH/BatchWork/PDX_001/Result
+    
+
+# Comprehensive analysis on primary and PDX samples.
+
+## The pedigree information for primary and PDX samples are saved with the fixed format as:
+
+    /home/projects/cu_10184/projects/PTH/Meta/PAT_PDX_Info.txt
+
+## The target file for PDX samples is saved as:
+
+    /home/projects/cu_10184/projects/PTH/PanelSeqData/Bait_Target/Target/Chr_Padded/Focused_myeloid_panel-All_target_segments_covered_by_probes-TE-93310852_hg38_v2_190722165759.bed
+
+For primary samples, variants are filtered for PDX target regions.
+
+## To run the analysis:
+
+    Rscript /home/projects/cu_10184/projects/PTH/Code/PAT_PDX/Evolution.R [thresh_spaghetti] > /home/projects/cu_10184/projects/PTH/Code/PAT_PDX/Evolution.Rout
+    [thresh_spaghetti]: On spagjetti plot, only variants that have AF greater than [thresh_spaghetti] either in PAT or PDX sample will be on the plot.
+    
+## The results are under the directory:
+
+    /home/projects/cu_10184/projects/PTH/PAT_PDX/Result
+
+##
