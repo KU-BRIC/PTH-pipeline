@@ -1,2 +1,0 @@
-cd /home/projects/cu_10184/projects/PTH/AllBatches_1/Lock/SNV_InDel/MuTect2/PoN/tmp
-gatk CreateSomaticPanelOfNormals -R /home/projects/cu_10184/people/haikon/Reference/GATK/hg38_MaskedU2AF1L5/Homo_sapiens_assembly38_MaskedU2AF1L5.fasta -V gendb:///home/projects/cu_10184/projects/PTH/AllBatches_1/Lock/SNV_InDel/MuTect2/PoN/GenomicsDB -O /home/projects/cu_10184/projects/PTH/Reference/MuTect2/pon.vcf.gz
