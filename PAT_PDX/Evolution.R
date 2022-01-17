@@ -2,7 +2,7 @@
 ####################################################################################################################
 # 
 # Author: Haiying Kong
-# Last Modified: 15 December 2021
+# Last Modified: 20 December 2021
 ####################################################################################################################
 ####################################################################################################################
 #!/home/projects/cu_10184/people/haikon/Software/R-4.0.4/bin/Rscript
@@ -25,7 +25,7 @@ maf.cols = c('Hugo_Symbol', 'Chromosome', 'Start_Position', 'End_Position', 'Ref
 
 # Get argument values from command line.
 args = commandArgs(trailingOnly=TRUE)
-thresh.spa = args[1]
+thresh.spa = as.numeric(args[1])
 
 # Clean lock and result directories.
 lock.dir = '/home/projects/cu_10184/projects/PTH/PAT_PDX/Lock/SNV_InDel/maf'
@@ -180,14 +180,14 @@ for (i in 1:nrow(ped))   {
   # Variants in both pat and pdx0.
   if (length(which(!is.na(idx))) > 0)  {
     apple = cbind(pat[(!is.na(idx)), ], pdx0[idx[!is.na(idx)], c('Batch', 'Sample', 'AF', 'DP')])
-    apple = apple[ ,c(1:2,118:119,3:19,120:121,20:117)]
+    apple = apple[ ,c(1:2,117:118,3:19,119:120,20:116)]
     names(apple)[c(1:4, 20:23)] = c('PAT_Batch', 'PAT_Sample', 'PDX0_Batch', 'PDX0_Sample', 'PAT_AF', 'PAT_DP', 'PDX0_AF', 'PDX0_DP')
     }
 
   # Variants in only pat.
   if (length(which(is.na(idx))) > 0)  {
     aster = pat[is.na(idx), ]
-    aster = cbind(aster[ ,1:2], pdx0$Batch[1], pdx0$Sample[1], aster[ ,3:19], 0.0, 0, aster[ ,20:117])
+    aster = cbind(aster[ ,1:2], pdx0$Batch[1], pdx0$Sample[1], aster[ ,3:19], 0.0, 0, aster[ ,20:116])
     names(aster)[c(1:4, 20:23)] = c('PAT_Batch', 'PAT_Sample', 'PDX0_Batch', 'PDX0_Sample', 'PAT_AF', 'PAT_DP', 'PDX0_AF', 'PDX0_DP')
     if (is.null(apple))
       apple = aster  else
@@ -198,15 +198,15 @@ for (i in 1:nrow(ped))   {
   idx.pdx0 = which(!(pdx0.flag %in% pat.flag))
   if (length(idx.pdx0) > 0)  {
     aster = pdx0[idx.pdx0, ]
-    aster = cbind(pat$Batch[1], pat$Sample[1], aster[ ,1:17], 0.0, 0, aster[ ,18:117])
+    aster = cbind(pat$Batch[1], pat$Sample[1], aster[ ,1:17], 0.0, 0, aster[ ,18:116])
     names(aster)[c(1:4, 20:23)] = c('PAT_Batch', 'PAT_Sample', 'PDX0_Batch', 'PDX0_Sample', 'PAT_AF', 'PAT_DP', 'PDX0_AF', 'PDX0_DP')
     if (is.null(apple))
       apple = aster  else
       apple = rbind(apple, aster)
     }
 
-  apple$Delta_AF = apple$PDX0_AF - apple$PAT_AF
-  apple = apple[ ,c(1:23,122,24:121)]
+  apple$Delta_AF = apple$PDX0_AF / apple$PAT_AF
+  apple = apple[ ,c(1:23,121,24:120)]
 
   ##############################################################
   # Save apple.
@@ -219,18 +219,10 @@ for (i in 1:nrow(ped))   {
   venn = rbind(venn, c(ped$PAT_Batch[i], ped$PAT_Sample[i], ped$PDX0_Batch[i], ped$PDX0_Sample[i], ven))
 
   ##############################################################
-  # Plot venn Diagram and spaghetti.
+  # Plot spaghetti and venn Diagram.
   ##############################################################
   file.name = paste(ped$PAT_Batch[i], ped$PAT_Sample[i], ped$PDX0_Batch[i], ped$PDX0_Sample[i], sep='_')
   pdf(paste0(res.dir, '/Plot/', file.name, '.pdf'))
-
-  ###############
-  # venn Diagram:
-  aster = data.frame(PAT = (apple$PAT_DP!=0),
-                     PDX0 = (apple$PDX0_DP!=0))
-  vdc = vennCounts(aster)
-  vennDiagram(vdc, main=paste0('\n', '\n', '\n', '\n', ped$PAT_Sample[i], '\n', ped$PDX0_Sample[i]), circle.col=c('cornflowerblue', 'firebrick'),
-              cex.main=0.7, cex=0.7)
 
   ###############
   # Spaghetti:
@@ -241,9 +233,9 @@ for (i in 1:nrow(ped))   {
   aster = aster[(aster$PAT_AF>thresh.spa | aster$PDX0_AF>thresh.spa), ]
 
   aster[ ,3:4] = apply(aster[ ,3:4], 2, as.character)
-  for (i in 1:nrow(aster))  {
-    if (nchar(aster$Protein_Change[i])>12)
-    aster$Protein_Change[i] = substr(aster$Protein_Change[i], 1, 12)
+  for (ii in 1:nrow(aster))  {
+    if (nchar(aster$Protein_Change[ii])>12)
+    aster$Protein_Change[ii] = substr(aster$Protein_Change[ii], 1, 12)
     }
 
   aster$ID = apply(aster[ ,c(1:4,7)], 1, function(x) paste(x, collapse='_'))
@@ -278,6 +270,16 @@ for (i in 1:nrow(ped))   {
         theme(plot.title=element_text(size=0.1, face='bold'), legend.text=element_text(size=0.7)) +
         theme_bw()
   print(p)
+
+  ###############
+  # venn Diagram:
+  aster = data.frame(PAT = (apple$PAT_DP!=0),
+                     PDX0 = (apple$PDX0_DP!=0))
+  vdc = vennCounts(aster) 
+  vennDiagram(vdc, main=paste0('\n', '\n', '\n', '\n', ped$PAT_Sample[i], '\n', ped$PDX0_Sample[i]), circle.col=c('cornflowerblue', 'firebrick'),
+              cex.main=0.7, cex=0.7) 
+              
+  ###############
 
   dev.off()
   }
